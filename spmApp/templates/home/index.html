@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LP Driving Skill Analysis{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="relative min-h-screen flex flex-col justify-center items-center text-white">
+
+    <div class="absolute inset-0 bg-cover bg-center blur-md" style="background-image: url('{% static "bg3.jpg" %}');"></div>
+    
+    <!-- Navbar -->
+    <nav class="absolute top-0 left-0 right-0 bg-black/50 p-4 flex justify-between items-center">
+        <span class="text-lg font-semibold">Speedo Meter Analysis Tool</span>
+        <div class="flex items-center space-x-4">
+            <button class="bg-cyan-600 px-4 py-2 rounded-md hover:bg-red-700 transition">Logout</button>
+            <img src="https://via.placeholder.com/40" alt="User Avatar" class="w-10 h-10 rounded-full border-2 border-white">
+        </div>
+    </nav>
+
+    <div class="relative text-center z-10 flex flex-col items-center">
+        <img src="{% static 'logo.png' %}" alt="Logo" class="w-40 h-40 mx-auto">
+        <h1 class="text-4xl font-bold">LP Driving Skill Analysis</h1>
+        <h2 class="text-xl mt-2 text-gray-200">Western Railway, Mumbai Division</h2>
+        <div class="bg-black/50 p-6 rounded-lg shadow-md">
+        <div class="mt-10 grid grid-cols-2 gap-4">
+            <a href="{% url 'spmApp:upload_medha' %}" class="bg-purple-600 px-14 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Process Medha (.txt file)</a>
+            <a href="{% url 'spmApp:upload_telpro_pdf' %}" class="bg-blue-600 px-14 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Process telpro (.pdf file)</a>
+            <a href="{% url 'spmApp:upload_laxvan' %}" class="bg-yellow-600 px-14 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Process Laxvan (.txt file)</a>
+            <a href="https://sites.google.com/view/tro-bct/home?authuser=0" class="bg-pink-400 px-14 py-3 rounded-lg text-lg hover:bg-blue-700 transition">e-TRO</a>
+            <a href="{% url 'spmApp:upload_quick_report' %}" class="bg-emerald-900 px-14 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Quick Report</a>
+            <a href="https://loco-pilot-driving-skill-analysis.streamlit.app/" target="_blank" class="bg-cyan-600 px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Data Visualization</a>
+            <a href="https://docs.google.com/presentation/d/1F-lzQE7awUBnW_RNFO0was9-UGXmBzjyUFCq6-mg6lA/present?slide=id.p1" target="_blank" class="bg-slate-600 px-14 py-3 rounded-lg text-lg hover:bg-blue-700 transition">User Guide</a>
+            <a href="{% url 'spmApp:clean_temp_files' %}" class="bg-lime-500 px-14 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Clear Temp file</a>
+            
+        </div>
+
+            <!-- Display Success or Error Messages -->
+            {% if messages %}
+            <div class="mt-4">
+                {% for message in messages %}
+                    <div class="p-3 rounded-md 
+                        {% if message.tags == 'success' %} bg-green-100 text-green-700 
+                        {% elif message.tags == 'error' %} bg-red-100 text-red-700 
+                        {% else %} bg-blue-100 text-blue-700 {% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+
+    </div>
+</div>
+
+    <!-- Footer -->
+    <footer class="absolute bottom-0 left-0 right-0 bg-black/50 text-center p-3">
+        Designed and Developed by Binay Kumar/LPP/BDTS
+    </footer>
+
+    <div class="container">{% block content %} {% endblock %}</div>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+    if first time then
+    git init
+    git add .  # Add all changes to the staging area
+    git commit -m "New Push"  # Commit changes with a meaningful message
+    git remote add origin https://github.com/binay1976/spm_django.git
+    git branch -M main
+    git push -u origin main
+    git push --force origin main (# to push forcefully)
+    
+    
+git init
+git add .  
+git commit -m "railway 2 Push"  
+git push -f # 
+
+
+    python manage.py runserver
+    Host on Railway.App :- https://www.youtube.com/watch?v=pzwJRwPWgCA
+    https://github.com/kumaresankp21/git_to_github_testing/blob/main/railway-deploy.txt
+
+    
+Create and install requirement.txt:--Python 3.13 version----------------------------------------------------------------------------------------------
+    pip freeze > requirements.txt
+    pip install -r requirements.txt
+
+Create and install requirement.txt items Manually:--Python 3.13 version----------------------------------------------------------------------------------------------
+    pip install --upgrade pip
+    python.exe -m pip install --upgrade pip
+    pip install django
+    pip install pandas
+    pip install numpy
+    pip install PyPDF2
+    pip install openpyxl
+    pip install PyPDF2
+    pip install requests
+    pip install pdfplumber
+    pip install gspread
+    pip install oauth2client
+    pip install xlsxwriter
+    pip install xlrd
+    pip install fpdf
+    pip install matplotlib
+    pip install plotly
+    pip install -U kaleido
+
+Create My env:-------------------------------------------------------------------------------------------------------------
+    https://blog.finxter.com/python-to-exe-without-pyinstaller-a-comprehensive-guide/
+    Install Env :- python.exe -m pip install virtualenv
+    Create Env:- python3.11 -m venv spm_django_env_3.11
+    "C:\Users\ABC\AppData\Local\Programs\Python\Python311\python.exe" -m venv spm_django_env_3.11
+    Activate env :- spm_django_env_3.11\Scripts\activate
+    Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
+
+    https://spm-exe-4vppppw6flwcgtsutagwra.streamlit.app/
+    https://spm-exe-4vppppw6flwcgtsutagwra.streamlit.app/?embed_options=show_toolbar,light_theme,show_colored_line,disable_scrolling,show_padding
+
+
+    
+
+
+

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Reporting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="relative min-h-screen flex items-center justify-center bg-gray-100 text-gray-900">
+    <!-- BG Image -->
+    <div class="absolute inset-0 bg-cover bg-center blur-md" style="background-image: url('{% static "bg3.jpg" %}');"></div>
+
+    <!-- Navbar -->
+    <nav class="absolute top-0 left-0 right-0 bg-black/50 p-4 flex justify-between items-center text-white">
+        <span class="text-lg font-semibold">Speedo Meter Analysis Tool</span>
+        <button class="bg-cyan-600 px-4 py-2 rounded-md hover:bg-red-700 transition" onclick="window.location.href='/logout'">Logout</button>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="relative z-10 flex w-full max-w-6xl items-center justify-between px-8">
+        <!-- Logo and Heading (Left) -->
+        <div class="flex flex-col items-center text-center flex-1">
+            <img src="{% static 'logo.png' %}" alt="Logo" class="w-40 h-40 mx-auto">
+            <h1 class="text-4xl font-bold mt-4 text-gray-300">LP Driving Skill Analysis</h1>
+            <h2 class="text-xl mt-2 text-gray-400">Western Railway, Mumbai Division</h2>
+        </div>
+<!-- Inside the Upload Section (Right) -->
+<div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md text-center">
+    <h2 class="text-2xl font-semibold mb-4 text-cyan-700">Quick Report Tool</h2>
+
+    <!-- Status Message -->
+    {% if message %}
+        <div class="bg-blue-100 text-blue-700 p-3 rounded-md mb-4">{{ message }}</div>
+    {% endif %}
+
+    <!-- FORM -->
+    <form id="uploadForm" method="post" enctype="multipart/form-data" class="mt-4" onsubmit="startProcessing()">
+        {% csrf_token %}
+
+        <div class="mb-4">
+            <label class="block text-left font-medium text-gray-700">Upload Pre-Processed Excel File:</label>
+            <input type="file" id="fileInput" name="file" class="mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300" required>
+        </div>
+
+        <!-- Dropdown for CMS_ID (Always Visible) -->
+        <div class="mt-4">
+            <label class="block text-left font-medium text-gray-700">Load & Select CMS ID:</label>
+            <div class="flex">
+                <select id="cmsDropdown" name="cms_id" class="flex-1 block w-full p-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300">
+                    <option value="">Click to Load CMS ID</option>
+                </select>
+                <button type="button" id="loadCMSID" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition">
+                    Load CMS ID 🔄
+                </button>
+            </div>
+        </div>
+        <!-- Loading GIF & Text -->
+        <div id="loading" class="hidden mt-4">
+            <img src="{% static 'balls2.gif' %}" alt="Processing..." class="mx-auto w-50 h-16">
+            <p class="text-red-600 font-semibold mt-2">Processing file, please wait... ⏳</p>
+        </div>
+
+        <!-- Success Message -->
+        <div id="successMessage" class="hidden mt-4">
+            <img src="{% static 'thumbsUp.gif' %}" alt="Success" class="mx-auto w-16 h-16">
+            <p class="text-green-600 font-semibold mt-2">File Processed Successfully! 🎉</p>
+        </div>
+        <br/>
+        <button type="submit" class="w-full bg-cyan-600 text-white py-2 rounded-md hover:bg-green-500 transition">Upload & Process 🚀🚀🚀</button>
+    </form>
+
+    <!-- Loading GIF & Text -->
+    <div id="loading" class="hidden mt-4">
+        <img src="{% static 'balls2.gif' %}" alt="Processing..." class="mx-auto w-50 h-16">
+        <p class="text-red-600 font-semibold mt-2">Processing file, please wait... ⏳</p>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="hidden mt-4">
+        <img src="{% static 'thumbsUp.gif' %}" alt="Success" class="mx-auto w-16 h-16">
+        <p class="text-green-600 font-semibold mt-2">File Processed Successfully! 🎉</p>
+    </div>
+
+    <!-- Back Button -->
+    <a href="/" class="mt-4 inline-block bg-pink-400 text-white py-2 px-4 rounded-md hover:bg-grey-600 transition">Back to Home 🎯</a>
+</div>
+</div>
+ <!-- Footer -->
+ <footer class="absolute bottom-0 w-full text-center py-4 text-white">
+    Design and Developed by Binay Kumar/LPP/BDTS
+</footer>
+
+<!-- JavaScript to Handle CMS ID Loading -->
+<script>
+    document.getElementById("loadCMSID").addEventListener("click", function () {
+        let formData = new FormData();
+        let fileInput = document.getElementById("fileInput").files[0];
+
+        if (!fileInput) {
+            alert("Please upload an Excel file first.");
+            return;
+        }
+
+        formData.append("file", fileInput);
+        formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+
+        fetch("{% url 'spmApp:extract_cms_ids' %}", {
+            method: "POST",
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            let cmsDropdown = document.getElementById("cmsDropdown");
+            cmsDropdown.innerHTML = '<option value="">Select CMS ID</option>';
+
+            if (data.cms_ids.length > 0) {
+                data.cms_ids.forEach(id => {
+                    let option = document.createElement("option");
+                    option.value = id;
+                    option.textContent = id;
+                    cmsDropdown.appendChild(option);
+                });
+            } else {
+                alert("No CMS_ID found in the uploaded file.");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+    function startProcessing() {
+        document.getElementById('loading').classList.remove('hidden'); // Show processing GIF
+        document.getElementById('successMessage').classList.add('hidden'); // Hide success message
+    }
+    // Auto-trigger success message when file is downloaded
+    window.addEventListener("focus", function () {
+        // Assume download is complete when user comes back to page
+        document.getElementById('loading').classList.add('hidden'); // Hide loading
+        document.getElementById('uploadForm').reset(); // Clear form
+        document.getElementById('successMessage').classList.remove('hidden'); // Show success message
+    });
+</script>
+</body>
+</html>

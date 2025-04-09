@@ -1,0 +1,8 @@
+spm_django_env_3.11/
+*.exe
+*.pkl
+*.zip
+*.tar
+*.tar.gz
+__pycache__/
+*.pyc

@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LP Driving Skill Analysis{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="relative min-h-screen flex flex-col justify-center items-center text-white">
+    
+    <!-- Background Image -->
+    {% comment %} <div class="absolute inset-0 bg-cover bg-center blur-md" style="background-image: url('bg.jpg');"></div> {% endcomment %}
+    {% load static %}
+    <div class="absolute inset-0 bg-cover bg-center blur-md" style="background-image: url('{% static "bg.jpg" %}');"></div>
+    
+    <!-- Navbar -->
+    <nav class="absolute top-0 left-0 right-0 bg-black/50 p-4 flex justify-between items-center">
+        <span class="text-lg font-semibold">LP Driving Skill Analysis</span>
+        <div class="flex items-center space-x-4">
+            <button class="bg-red-600 px-4 py-2 rounded-md hover:bg-red-700 transition">Logout</button>
+            <img src="https://via.placeholder.com/40" alt="User Avatar" class="w-10 h-10 rounded-full border-2 border-white">
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+     <!-- Main Content -->
+    <div class="relative flex justify-between items-center w-full px-20 z-10">
+        <!-- Left Side (Logo) -->
+        <div class="flex-1 flex justify-center">
+            <img src="{% static 'logo.png' %}" alt="Logo" class="w-40 h-40">
+        </div>
+    <div class="relative text-center z-10">
+        <h1 class="text-4xl font-bold">LP Driving Skill Analysis</h1>
+        <h2 class="text-xl mt-2 text-gray-200">Western Railway, Mumbai Division</h2>
+        
+        <div class="mt-10 grid grid-cols-2 gap-4">
+            
+            <a href="https://www.google.com" target="_blank" class="bg-purple-600 px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Google 2</a>
+            <a href="https://www.google.com" target="_blank" class="bg-blue-600 px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Google 3</a>
+            <a href="https://www.google.com" target="_blank" class="bg-green-600 px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Google 4</a>
+            <a href="https://www.google.com" target="_blank" class="bg-yellow-600 px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Google 5</a>
+            <a href="https://www.google.com" target="_blank" class="bg-red-600 px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Google 6</a>
+            <a href="https://www.google.com" target="_blank" class="bg-yellow-600 px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Google 5</a>
+            <a href="https://www.google.com" target="_blank" class="bg-red-600 px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Google 6</a>
+            <a href="https://loco-pilot-driving-skill-analysis.streamlit.app/" target="_blank" class="bg-pink-600 px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Analyse</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="absolute bottom-0 left-0 right-0 bg-black/50 text-center p-3">
+        Designed and Developed by Binay Kumar/LPP/BDTS
+    </footer>
+    <div class="container">{% block content %} {% endblock %}</div>
+</body>
+</html>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Upload Medha File</title>
+</head>
+<body>
+<h1>Upload Medha File</h1>
+
+{% if message %}
+    <p>{{ message }}</p>
+    {% if download_url %}
+        <p><a href="{{ download_url }}" download>Download Processed File</a></p>
+    {% endif %}
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>Select File:</label>
+    <input type="file" name="file" required>
+    
+    <br><br>
+    
+    {% comment %} <label>Enter Output Folder Path:</label>
+    <input type="text" name="output_path" required placeholder="C:/Users/YourName/Desktop/">
+    
+    <br><br> {% endcomment %}
+    
+    <button type="submit">Upload & Process</button>
+</form>
+</body>
+</html>
