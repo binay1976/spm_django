@@ -12,6 +12,8 @@ git init
 git add .  
 git commit -m "railway 2 Push"  
 git push -f # 
+git push --force --set-upstream origin main
+
 
 
     python manage.py runserver
