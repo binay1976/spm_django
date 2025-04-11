@@ -625,7 +625,14 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
         bft_end_dist = bft_end_filtered["Cum_Dist_LP"].iloc[0] if not bft_end_filtered.empty else "N/A"
         bft_end_speed = bft_end_filtered["Speed"].iloc[0] if not bft_end_filtered.empty else "N/A"
 
-        bft_total_dist = bft_end_dist - bft_dist
+        try:
+            bft_end_dist = pd.to_numeric(bft_end_dist, errors='coerce')
+            bft_dist = pd.to_numeric(bft_dist, errors='coerce')
+            bft_total_dist = bft_end_dist - bft_dist
+        except Exception as e:
+            print(f"[ERROR] Failed to calculate BFT distance: {e}")
+            bft_total_dist = None
+
 
         # Data for Filter values where 'BPT' column contains 'BPT'
         bpt_filtered = df[df["BPT"] == "BPT"]
@@ -638,7 +645,14 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
         bpt_end_dist = bpt_end_filtered["Cum_Dist_LP"].iloc[0] if not bpt_end_filtered.empty else "N/A"
         bpt_end_speed = bpt_end_filtered["Speed"].iloc[0] if not bpt_end_filtered.empty else "N/A"
 
-        bpt_total_dist = bpt_end_dist - bpt_dist
+        try:
+            bpt_end_dist = pd.to_numeric(bpt_end_dist, errors='coerce')
+            bpt_dist = pd.to_numeric(bpt_dist, errors='coerce')
+            bpt_total_dist = bpt_end_dist - bpt_dist
+        except Exception as e:
+            print(f"[ERROR] Failed to calculate BFT distance: {e}")
+            bpt_total_dist = None
+
 
         # Create Table Header--------------------------------------------------------------------------------------
         pdf.set_font("Arial", style="B", size=10)
