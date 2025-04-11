@@ -268,7 +268,7 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
             pdf.set_text_color(176, 224, 230)
             pdf.set_xy(40, 15)
             pdf.cell(0, 10, "Loco Pilot Driving Technique Analysis", ln=True, align="C")
-            pdf.set_font("Arial", 13)
+            pdf.set_font("Arial", size=13)
             pdf.set_text_color(0,0,0)
             pdf.set_xy(40, 25)
             pdf.cell(0, 10, "Western Railway", ln=True, align="C")
@@ -292,7 +292,6 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
                 ("Prepared By", "............................................"),
                 ("Record Period", total_duration if total_duration != "Date processing error" 
                  else "Date information not available"),
-                ("WS to WS Duration", ws_duration),
                 ("Loco Pilot Name", pilot_name),
                 ("Designation", designation),
                 ("CMS_ID", cms_id),
@@ -304,6 +303,7 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
                 ("Total Distance", f"{total_km} KM"),
                 ("Total Running Time", f"{running_time_str} Hrs."),
                 ("Total Halt Time", f"{halt_time_str} Hrs."),
+                ("WS to WS Duration", ws_duration),
                 ("Top Speed", f"{top_speed} Kmph"),
                 ("Average Speed", f"{avg_speed} Kmph"),
                 ("Total Halt", f"{total_halt} Times")
@@ -318,51 +318,51 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
             print(f"❌ Error adding content to PDF: {str(e)}")
             raise
 
-        # ====== BPT/BFT Table & Data ======
-        # pdf.add_page()
-        if "BPT" in df.columns:
-            bpt_filtered = df[df["BPT"] == "BPT"]
-        else:
-            bpt_filtered = pd.DataFrame()
+        # # ====== BPT/BFT Table & Data ======
+        # # pdf.add_page()
+        # if "BPT" in df.columns:
+        #     bpt_filtered = df[df["BPT"] == "BPT"]
+        # else:
+        #     bpt_filtered = pd.DataFrame()
 
-        pdf.set_font("Arial", style="B", size=14)
-        pdf.cell(200, 10, f"Brake Feel & Brake Power Test Conducted", ln=True, align="L")
+        # pdf.set_font("Arial", style="B", size=14)
+        # pdf.cell(200, 10, f"Brake Feel & Brake Power Test Conducted", ln=True, align="L")
         
-        # Data for First Row - BFT Done
-        bft_filtered = df[df["BFT"] == "BFT"]
-        bft_time = bft_filtered["Time"].iloc[0] if not bft_filtered.empty else "N/A"
-        bft_dist = bft_filtered["Cum_Dist_LP"].iloc[0] if not bft_filtered.empty else "N/A"
-        bft_speed = bft_filtered["Speed"].iloc[0] if not bft_filtered.empty else "N/A"
+        # # Data for First Row - BFT Done
+        # bft_filtered = df[df["BFT"] == "BFT"]
+        # bft_time = bft_filtered["Time"].iloc[0] if not bft_filtered.empty else "N/A"
+        # bft_dist = bft_filtered["Cum_Dist_LP"].iloc[0] if not bft_filtered.empty else "N/A"
+        # bft_speed = bft_filtered["Speed"].iloc[0] if not bft_filtered.empty else "N/A"
         
-        # Data for BPT
-        bpt_time = bpt_filtered["Time"].iloc[0] if not bpt_filtered.empty else "N/A"
-        bpt_dist = bpt_filtered["Cum_Dist_LP"].iloc[0] if not bpt_filtered.empty else "N/A"
-        bpt_speed = bpt_filtered["Speed"].iloc[0] if not bpt_filtered.empty else "N/A"
+        # # Data for BPT
+        # bpt_time = bpt_filtered["Time"].iloc[0] if not bpt_filtered.empty else "N/A"
+        # bpt_dist = bpt_filtered["Cum_Dist_LP"].iloc[0] if not bpt_filtered.empty else "N/A"
+        # bpt_speed = bpt_filtered["Speed"].iloc[0] if not bpt_filtered.empty else "N/A"
 
-        # Create Table Header
-        pdf.set_font("Arial", style="B", size=12)
-        pdf.cell(40, 10, "Test Done", border=1, align="C")
-        pdf.cell(40, 10, "Time", border=1, align="C")
-        pdf.cell(40, 10, "Distance (In Mtr)", border=1, align="C")
-        pdf.cell(40, 10, "At Speed", border=1, align="C")
-        pdf.ln()
+        # # Create Table Header
+        # pdf.set_font("Arial", style="B", size=12)
+        # pdf.cell(40, 10, "Test Done", border=1, align="C")
+        # pdf.cell(40, 10, "Time", border=1, align="C")
+        # pdf.cell(40, 10, "Distance (In Mtr)", border=1, align="C")
+        # pdf.cell(40, 10, "At Speed", border=1, align="C")
+        # pdf.ln()
 
-        # Table content
-        pdf.set_font("Arial", size=12)
-        # First Row - BFT Done
-        pdf.cell(40, 10, "BFT Done", border=1, align="C")
-        pdf.cell(40, 10, str(bft_time), border=1, align="C")
-        pdf.cell(40, 10, str(bft_dist), border=1, align="C")
-        pdf.cell(40, 10, str(bft_speed), border=1, align="C")
-        pdf.ln()
-        # Second Row - BPT Done
-        pdf.cell(40, 10, "BPT Done", border=1, align="C")
-        pdf.cell(40, 10, str(bpt_time), border=1, align="C")
-        pdf.cell(40, 10, str(bpt_dist), border=1, align="C")
-        pdf.cell(40, 10, str(bpt_speed), border=1, align="C")
-        pdf.ln()
+        # # Table content
+        # pdf.set_font("Arial", size=12)
+        # # First Row - BFT Done
+        # pdf.cell(40, 10, "BFT Done", border=1, align="C")
+        # pdf.cell(40, 10, str(bft_time), border=1, align="C")
+        # pdf.cell(40, 10, str(bft_dist), border=1, align="C")
+        # pdf.cell(40, 10, str(bft_speed), border=1, align="C")
+        # pdf.ln()
+        # # Second Row - BPT Done
+        # pdf.cell(40, 10, "BPT Done", border=1, align="C")
+        # pdf.cell(40, 10, str(bpt_time), border=1, align="C")
+        # pdf.cell(40, 10, str(bpt_dist), border=1, align="C")
+        # pdf.cell(40, 10, str(bpt_speed), border=1, align="C")
+        # pdf.ln()
 
-        # ===== Speed Slab Table & Data =====
+# ===== Speed Slab Table & Data =====
         pdf.add_page()
         pdf.set_font("Arial", style="B", size=16)
         pdf.cell(200, 10, f"SPM Report For Loco_No {loco_no} & CMS_ID {cms_id}", ln=True, align="C")
@@ -379,9 +379,9 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
 
         # Define speed slabs
         speed_slabs = [
-            (1, 10), (10, 20), (20, 30), (30, 40), (40, 50),
-            (50, 60), (60, 70), (70, 80), (80, 90), (90, 100),
-            (100, 110), (110, 120), (120, 130), (130, 150)
+            (1, 10), (11, 20), (21, 30), (31, 40), (41, 50),
+            (51, 60), (61, 70), (71, 80), (81, 90), (91, 100),
+            (101, 110), (111, 120), (121, 130), (131, 150)
         ]
 
         # Table Headers
@@ -402,7 +402,7 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
             pdf.cell(60, 10, strfdelta(total_time), border=1, align="C")
             pdf.ln()
 
-        # ===== Bar Graph For Run Numbers =====
+# ===== Bar Graph For Run Numbers =====
         pdf.add_page(orientation='L')
         max_speed = df.groupby(['Run_No', 'CMS_ID'])['Speed'].max().reset_index()
         max_speed = max_speed[max_speed['CMS_ID'] == cms_id]
@@ -433,6 +433,368 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
         pdf.set_font("Arial", style="B", size=14)
         pdf.cell(280, 10, f"Top Speed Between Each Halt (CMS_ID: {cms_id} & Loco_No {loco_no})", ln=True, align='C')
         pdf.image(chart_path, x=10, y=40, w=285)
+
+# Create Time VS Speed Area Graph in PDF instance in portrait mode  ================================================================================================== 
+        filtered_cms_df = df[df["CMS_ID"] == cms_id].copy()
+        filtered_cms_df["Time"] = pd.to_datetime(filtered_cms_df["Time"]).dt.strftime('%H:%M:%S')
+        filtered_cms_df = filtered_cms_df.sort_values(by="Time")
+        # Create Line Chart
+        fig = px.line(
+            filtered_cms_df,
+            x="Time",
+            y="Speed",
+            title=f"Speed Variation Over Time for CMS_ID: {cms_id} Top Speed - {top_speed} Km/h",
+            labels={"Time": "Time", "Speed": "Speed (km/h)"},
+            color_discrete_sequence=["#3366CC"]
+        )
+        # Find Top Speed
+        top_speed = filtered_cms_df["Speed"].max()
+        top_speed_time = filtered_cms_df.loc[filtered_cms_df["Speed"] == top_speed, "Time"].iloc[0]
+
+        # Improve Chart Appearance
+        fig.update_layout(
+            plot_bgcolor="white",
+            xaxis=dict(
+                showgrid=True,
+                gridcolor="lightgray",
+                title_font=dict(size=14),
+                tickangle=90,  # Rotate time labels for better visibility
+                type="category",  # Treat time as categorical to prevent skipping values
+                showline=True,  # Show Y-axis line
+
+            ),
+            yaxis=dict(
+                showgrid=True,
+                gridcolor="lightgray",
+                title_font=dict(size=14),
+                showline=True,  # Show Y-axis line
+                type="linear",
+                layer="below traces",
+                zeroline=True,  # Ensure zero line is visible
+                zerolinecolor="blue",  # Make sure it's green
+                zerolinewidth=1,  # Set thickness of the zero line   # Adjust thickness  # Adjust thickness
+            ),
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=12
+            ),
+            margin=dict(b=150)  # Extra margin for long time labels
+        )
+        # Add Top Speed Annotation
+        fig.add_annotation(
+            x=top_speed_time,
+            y=top_speed,
+            text="Top Speed",
+            showarrow=True,
+            arrowhead=4,
+            arrowcolor="red",
+            font=dict(color="black", size=12)
+        )
+        # Save Plotly Figure as an Image (PNG)
+        chart_path = "speed_chart.png"
+        pio.write_image(fig, chart_path, format="png", width=1000, height=500, scale=2)
+        # === Add Graph on Page 4 in Landscape Mode ===
+        pdf.add_page(orientation='L')  # Only this page is Landscape
+        # Add title for Graph Page
+        pdf.set_font("Arial", style="B", size=14)
+        Loco_No = filtered_cms_df["Loco_No"].min()  # Get Loco_No from filtered DataFrame
+        pdf.cell(280, 10, f"Report for CMS_ID: {cms_id} & Loco_No {Loco_No}", ln=True, align='C')
+        # Insert image in PDF
+        pdf.ln(10)  # Space before image
+        pdf.image(chart_path, x=10, y=20, w=285)  # Adjust width for landscape
+# Distance Chart...........................................................................................................
+        filtered_cms_df = df[df["CMS_ID"] == cms_id].copy()
+        filtered_cms_df = filtered_cms_df.sort_values(by="Cum_Dist_LP")
+
+        # Define tick interval for X-Axis
+        cum_dist_min = filtered_cms_df["Cum_Dist_LP"].min()
+        cum_dist_max = filtered_cms_df["Cum_Dist_LP"].max()
+
+        if pd.notna(cum_dist_min) and pd.notna(cum_dist_max):
+            tick_step = max(1000, int((cum_dist_max - cum_dist_min) // 10) or 1)
+            tick_values = list(range(int(cum_dist_min), int(cum_dist_max) + tick_step, tick_step))
+        else:
+            tick_values = []
+
+        # Create Line Chart
+        fig = px.line(
+            filtered_cms_df,
+            x="Cum_Dist_LP",
+            y="Speed",
+            title=f"Speed Variation Over Distance for CMS_ID: {cms_id}",
+            labels={"Cum_Dist_LP": "Distance (km)", "Speed": "Speed (km/h)"},
+            color_discrete_sequence=["#3366CC"]
+        )
+        top_speed = filtered_cms_df["Speed"].max()
+        if not pd.isna(top_speed):
+            top_speed_dist = filtered_cms_df.loc[filtered_cms_df["Speed"] == top_speed, "Cum_Dist_LP"].median()
+        else:
+            top_speed_dist = 0
+
+        # Improve Chart Appearance
+        fig.update_layout(
+            plot_bgcolor="white",
+            xaxis=dict(
+                showgrid=True,
+                gridcolor="lightgray",
+                title_font=dict(size=14),
+                tickangle=90,
+                tickmode="array",
+                tickvals=tick_values,
+                type="linear",
+                showline=True,  # Show Y-axis line
+            ),
+            yaxis=dict(
+                showgrid=True,
+                gridcolor="lightgray",
+                title_font=dict(size=14),
+                showline=True,  # Show Y-axis line
+                type="linear",
+                layer="below traces",
+                zeroline=True,  # Ensure zero line is visible
+                zerolinecolor="blue",  # Make sure it's green
+                zerolinewidth=1,  # Set thickness of the zero line   # Adjust thickness  # Adjust thickness
+                
+            ),
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=12
+            ),
+            margin=dict(b=150)
+        )
+
+        # Add Top Speed Annotation
+        fig.add_annotation(
+            x=top_speed_dist,
+            y=top_speed,
+            text="Top Speed",
+            showarrow=True,
+            arrowhead=4,
+            arrowcolor="red",
+            font=dict(color="red", size=12)
+        )
+
+        # Save Plotly Figure as an Image (PNG)
+        graph_path = "dist_chart.png"
+        if not filtered_cms_df.empty:
+            pio.write_image(fig, graph_path, format="png", width=1000, height=500, scale=2)
+        else:
+            print("Warning: No data available for graph generation.")
+
+        # === Add Graph on Page 4 in Landscape Mode ===
+        pdf.add_page(orientation='L')
+
+        # Add title for Graph Page
+        pdf.set_font("Arial", style="B", size=14)
+        Loco_No = filtered_cms_df["Loco_No"].min()
+        if pd.isna(Loco_No):
+            Loco_No = "Unknown"
+
+        pdf.cell(280, 10, f"Report for CMS_ID: {cms_id} & Loco_No {Loco_No}", ln=True, align='C')
+
+        # Insert image in PDF
+        pdf.ln(10)
+        pdf.image(graph_path, x=10, y=20, w=285)
+        print("Dist-Speed Chart Done")
+
+# BFT & BPT Table..............................................................................................
+        try:
+            filtered_cms_df["Time"] = pd.to_datetime(filtered_cms_df["Time"]).dt.strftime('%H:%M:%S')
+        except Exception as e:
+            print(f"Error converting Time column: {e}")
+
+        if "BPT" in df.columns:
+            bpt_filtered = df[df["BPT"] == "BPT"]
+        else:
+            bpt_filtered = pd.DataFrame()
+        pdf.add_page(orientation='L')  # Landscape Page
+        pdf.set_font("Arial", style="B", size=14)
+        pdf.cell(280, 10, f"Report for CMS_ID: {cms_id} & Loco_No {Loco_No}", ln=True, align='C')
+        pdf.ln(30)
+        pdf.set_font("Arial", style="", size=12)
+        pdf.cell(280, 10, f"Brake Feel & Brake Power Test Conducted (Within 10 Km of First Section)", ln=True, align="L")
+        pdf.ln(10)
+        # Data for First Row - BFT Done
+        bft_filtered = df[df["BFT"] == "BFT"]
+        bft_time = (bft_filtered["Time"].iloc[0].strftime('%H:%M:%S') if not bft_filtered.empty else "N/A")
+        bft_dist = bft_filtered["Cum_Dist_LP"].iloc[0] if not bft_filtered.empty else "N/A"
+        bft_speed = bft_filtered["Speed"].iloc[0] if not bft_filtered.empty else "N/A"
+
+        bft_end_filtered = df[df["BFT_END"] == "BFT_END"]
+        bft_end_time = (bft_end_filtered["Time"].iloc[0].strftime('%H:%M:%S') if not bft_end_filtered.empty else "N/A")
+        bft_end_dist = bft_end_filtered["Cum_Dist_LP"].iloc[0] if not bft_end_filtered.empty else "N/A"
+        bft_end_speed = bft_end_filtered["Speed"].iloc[0] if not bft_end_filtered.empty else "N/A"
+
+        bft_total_dist = bft_end_dist - bft_dist
+
+        # Data for Filter values where 'BPT' column contains 'BPT'
+        bpt_filtered = df[df["BPT"] == "BPT"]
+        bpt_time = (bpt_filtered["Time"].iloc[0].strftime('%H:%M:%S') if not bpt_filtered.empty else "N/A")
+        bpt_dist = bpt_filtered["Cum_Dist_LP"].iloc[0] if not bpt_filtered.empty else "N/A"
+        bpt_speed = bpt_filtered["Speed"].iloc[0] if not bpt_filtered.empty else "N/A"
+
+        bpt_end_filtered = df[df["BPT_END"] == "BPT_END"]
+        bpt_end_time = (bpt_end_filtered["Time"].iloc[0].strftime('%H:%M:%S') if not bpt_end_filtered.empty else "N/A")
+        bpt_end_dist = bpt_end_filtered["Cum_Dist_LP"].iloc[0] if not bpt_end_filtered.empty else "N/A"
+        bpt_end_speed = bpt_end_filtered["Speed"].iloc[0] if not bpt_end_filtered.empty else "N/A"
+
+        bpt_total_dist = bpt_end_dist - bpt_dist
+
+        # Create Table Header--------------------------------------------------------------------------------------
+        pdf.set_font("Arial", style="B", size=10)
+        pdf.cell(35, 10, "Test Done", border=1, align="C")
+        pdf.cell(35, 10, "Start Time", border=1, align="C")
+        pdf.cell(35, 10, "End Time", border=1, align="C")
+        pdf.cell(35, 10, "Start Distance", border=1, align="C")
+        pdf.cell(35, 10, "End Distance", border=1, align="C")
+        pdf.cell(35, 10, "Total Distance", border=1, align="C")
+        pdf.cell(35, 10, "Start Speed", border=1, align="C")
+        pdf.cell(35, 10, "End Speed", border=1, align="C")
+        pdf.ln()
+        # Reset font for table content
+        pdf.set_font("Arial", size=10)
+    # First Row - BFT Done
+        pdf.cell(35, 10, "BFT", border=1, align="C")
+        pdf.cell(35, 10, str(bft_time), border=1, align="C")
+        pdf.cell(35, 10, str(bft_end_time), border=1, align="C")
+        pdf.cell(35, 10, str(bft_dist), border=1, align="C")
+        pdf.cell(35, 10, str(bft_end_dist), border=1, align="C")
+        pdf.cell(35, 10, str(bft_total_dist), border=1, align="C")
+        pdf.cell(35, 10, str(bft_speed), border=1, align="C")
+        pdf.cell(35, 10, str(bft_end_speed), border=1, align="C")
+        pdf.ln()
+        # Second Row - BPT Done
+        pdf.cell(35, 10, "BPT", border=1, align="C")
+        pdf.cell(35, 10, str(bpt_time), border=1, align="C")
+        pdf.cell(35, 10, str(bpt_end_time), border=1, align="C")
+        pdf.cell(35, 10, str(bpt_dist), border=1, align="C")
+        pdf.cell(35, 10, str(bpt_end_dist), border=1, align="C")
+        pdf.cell(35, 10, str(bpt_total_dist), border=1, align="C")
+        pdf.cell(35, 10, str(bpt_speed), border=1, align="C")
+        pdf.cell(35, 10, str(bpt_end_speed), border=1, align="C")
+        pdf.ln(20)
+        pdf.cell(280, 10, f"Note:- All Distances are Shown in Meters", ln=True, align="L")
+
+
+    # =====BPT BFT Done line Chart ======================================================================================
+        data_base = df[df['Cum_Dist_LP'] < 10000]
+        bft = data_base[data_base['BFT_BPT'] == "BFT"]
+        bpt = data_base[data_base['BFT_BPT'] == "BPT"]
+        # Define tick interval for X-Axis
+        tick_step = max(1000, (data_base["Cum_Dist_LP"].max() - data_base["Cum_Dist_LP"].min()) // 10)
+        tick_values = list(range(int(data_base["Cum_Dist_LP"].min()), int(data_base["Cum_Dist_LP"].max()) + tick_step, tick_step))
+        # Create Line Chart
+        fig = px.line(
+            data_base,
+            x="Cum_Dist_LP",
+            y="Speed",
+            title="Brake Feel & Brake Power Test (In First Section of 10 KM)",
+            labels={"Cum_Dist_LP": "Distance (mtr)", "Speed": "Speed (km/h)"},
+            color_discrete_sequence=["#05B7B7"]
+        )
+        # Add text annotations at specific points
+        Dist_points1 = bft.index.tolist() + bpt.index.tolist()
+        text_values = ['BFT Done'] * len(bft) + ['BPT Done'] * len(bpt)
+        for i, tp in enumerate(Dist_points1):
+            if tp in data_base.index:
+                selected_data = data_base.loc[tp]
+                fig.add_annotation(
+                    x=selected_data['Cum_Dist_LP'],
+                    y=selected_data['Speed'],
+                    text=text_values[i],
+                    showarrow=True,
+                    arrowhead=4,
+                    arrowcolor="red",
+                    font=dict(color="black", size=12)
+                )
+        # Define X-axis ticks at multiples of 100 km
+        tick_step = 100  # Fixed interval of 100 km
+        tick_values = list(range(
+            int(filtered_cms_df["Cum_Dist_LP"].min()), 
+            int(filtered_cms_df["Cum_Dist_LP"].max()) + tick_step, 
+            tick_step
+        ))
+        # Define Y-axis ticks at multiples of 100 km
+        tick_step_y = 5  # Fixed interval of 100 km
+        tick_values_y = list(range(
+            int(filtered_cms_df["Speed"].min()), 
+            int(filtered_cms_df["Speed"].max()) + tick_step, 
+            tick_step_y
+        ))
+        # Improve Chart Appearance
+        fig.update_layout(
+            plot_bgcolor="white",
+            xaxis=dict(
+                showgrid=True,
+                gridcolor="lightgray",
+                title_font=dict(size=9),
+                tickangle=90,
+                tickmode="array",
+                tickvals=tick_values,
+                type="linear",
+            ),
+            yaxis=dict(
+                showgrid=True,
+                gridcolor="lightgray",
+                title_font=dict(size=9), 
+                tickvals=tick_values_y,
+                type="linear",
+                layer="below traces",
+                zeroline=True,  # Ensure zero line is visible
+                zerolinecolor="blue",  # Make sure it's green
+                zerolinewidth=1,  # Set thickness of the zero line   # Adjust thickness  # Adjust thickness
+            ),
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=12
+            ),
+            margin=dict(b=150)
+        )
+        # Save the figure as an image
+        graph_path = "Bpt_graph.png"
+        pio.write_image(fig, graph_path, format="png", width=1000, height=500, scale=2)
+        pdf.add_page(orientation='L')
+        pdf.set_font("Arial", style="B", size=14)
+        Loco_No = data_base["Loco_No"].min()  # Get Loco_No from filtered DataFrame
+        pdf.cell(280, 10, f"Report for CMS_ID: {cms_id} & Loco_No {Loco_No}", ln=True, align='C')
+        # Insert image in PDF
+        pdf.ln(10)  # Space before image
+        pdf.image(graph_path, x=10, y=20, w=285)  # Adjust width for landscape
+
+        print("BPT-BFT line Chart Done")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         # Save the complete PDF
         pdf.output(pdf_file_path)

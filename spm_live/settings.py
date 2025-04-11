@@ -72,32 +72,6 @@ TEMPLATES = [
     },
 ]
 
-# import os
-
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# TEMPLATES = [
-#     {
-#         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-#         'DIRS': [os.path.join(BASE_DIR, 'spmApp', 'templates')],  # ✅ Make sure this is correct
-#         'APP_DIRS': True,  # ✅ Required for Django Admin
-#         'OPTIONS': {
-#             'context_processors': [
-#                 'django.template.context_processors.debug',
-#                 'django.template.context_processors.request',
-#                 'django.contrib.auth.context_processors.auth',
-#                 'django.contrib.messages.context_processors.messages',
-#             ],
-#         },
-#     },
-# ]
-
-
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'spmApp', 'static'),  # ✅ Correct path
-# ]
-
-
 WSGI_APPLICATION = 'spm_live.wsgi.application'
 
 
@@ -143,17 +117,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-# import os
-# from pathlib import Path
-# STATIC_URL = 'static/'
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, "static"),  # Adjust if your static folder is elsewhere
-# ]
-# STATICSTORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 import os
 from pathlib import Path

@@ -13,6 +13,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+import sys
 
 
 def index(request):
@@ -68,7 +69,7 @@ def upload_medha(request):
             # Run `telpro_pdf.py` script
             try:
                 script_path = os.path.join(settings.BASE_DIR, "spmApp", "medha.py")
-                subprocess.run(["python", script_path, full_temp_path], check=True)
+                subprocess.run([sys.executable, script_path, full_temp_path, processed_file_path], check=True)
 
                 # Check if file exists after processing
                 if os.path.exists(processed_file_path):
@@ -97,6 +98,7 @@ from django.shortcuts import render
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.http import FileResponse
+import sys
 
 def upload_telpro_pdf(request):
     print("🚀 Views.upload_telpro running")
@@ -121,7 +123,8 @@ def upload_telpro_pdf(request):
             try:
                 # Call telpro_pdf.py using subprocess and pass input/output paths
                 script_path = os.path.join(settings.BASE_DIR, "spmApp", "telpro_pdf.py")
-                subprocess.run(["python", script_path, full_temp_path, processed_file_path], check=True)
+                subprocess.run([sys.executable, script_path, full_temp_path, processed_file_path], check=True)
+
 
                 # Serve the Excel file if created
                 if os.path.exists(processed_file_path):
@@ -164,7 +167,7 @@ def upload_laxvan(request):
             # Run `telpro_pdf.py` script
             try:
                 script_path = os.path.join(settings.BASE_DIR, "spmApp", "laxvan.py")
-                subprocess.run(["python", script_path, full_temp_path], check=True)
+                subprocess.run([sys.executable, script_path, full_temp_path, processed_file_path], check=True)
 
                 # Check if file exists after processing
                 if os.path.exists(processed_file_path):
@@ -212,13 +215,14 @@ def upload_quick_report(request):
             # Run quick_report.py with the uploaded file and selected CMS_ID
             script_path = os.path.join(settings.BASE_DIR, "spmApp", "quick_report.py")
             
+            
             # Debug prints
             print(f"Script path: {script_path}")
             print(f"Command: python {script_path} {full_temp_path} {selected_cms_id}")
 
             # Run the script and capture output
             process = subprocess.run(
-                ["python", script_path, full_temp_path, selected_cms_id],
+                [sys.executable, script_path, full_temp_path, selected_cms_id],
                 capture_output=True,
                 text=True,
                 check=False

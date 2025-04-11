@@ -5,6 +5,8 @@ import warnings
 import sys
 import re
 import numpy as np
+import os
+import pandas as pd
 
 def process_pdf(input_path, output_path):
     warnings.filterwarnings("ignore")
@@ -71,6 +73,22 @@ def process_pdf(input_path, output_path):
     df[["Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11"]] = df["data"].apply(lambda x: pd.Series(extract_values(x)))
     print("Splittings Done")
 # -------------------------------------------------------------------------------------------------------
+    def extract_values(row):
+        pattern = r"""
+            Driver\s+ID:-\s*(.+?)\s+
+            Train\s+No:-\s*(.+?)\s+
+            Tr\s+Load\(Ton\):-\s*(.+?)\s+
+            Loco\s+No:-\s*(.+?)\s+
+            Wheel\s+Dia\(mm\):-\s*(.+?)\s+
+            SpeedLimit\(kmph\):-\s*(.+?)
+        """
+        match = re.search(pattern, str(row), re.VERBOSE | re.DOTALL)
+        if match:
+            return list(match.groups())
+        return [None] * 6
+    df[["Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11"]] = df["data"].apply(lambda x: pd.Series(extract_values(x)))
+    print("Splittings Done")
+# -------------------------------------------------------------------------------------------------------
      # Reaaarnge Columns
     desired_order = [
         "Column_1", "Column_2", "Column_3", "Column_4", "Status", "data", 
@@ -80,32 +98,19 @@ def process_pdf(input_path, output_path):
 # ----------------------------------------------------------------------------------------------
     # Columns to apply the fill operation
     columns_to_fill = ["Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11"]
-
-    # Find indices where 'Status' is "CHANGED"
     changed_idx = df.index[df["Status"] == "CHANGED"].tolist()
     start = 0
     for i in range(len(changed_idx)):
         # Fill down from the last valid data point until "CHANGED"
         df.loc[start:changed_idx[i]-1, columns_to_fill] = df.loc[start:changed_idx[i]-1, columns_to_fill].ffill()
-
-        # After "CHANGED", find the next valid data and fill backwards
         next_valid = df[columns_to_fill].iloc[changed_idx[i]+1:].first_valid_index()
         if next_valid is not None:
             df.loc[changed_idx[i]+1:next_valid, columns_to_fill] = df.loc[changed_idx[i]+1:next_valid, columns_to_fill].bfill()
-
-        # Move to next section
         start = changed_idx[i] + 1
-
-    # Fill down the last segment after the last "CHANGED"
     df.loc[start:, columns_to_fill] = df.loc[start:, columns_to_fill].ffill()
-    
-    
-
 # -------------------------------------------------------------------------------------------------------
     # Filter: Keep rows where Column_1 contains "Driver ID:-" or "/2"
     df = df[df["Status"].astype(str).str.contains("RUN|STOP", na=False, regex=True)]
-
-     # Reaaarnge Columns
     desired_order = [
         "Column_1", "Column_2", "Column_3", "Column_4", 
         "Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11", "Status", "data"
@@ -116,6 +121,10 @@ def process_pdf(input_path, output_path):
     df.columns = ["Date", "Time", "Distance", "Speed", "CMS_ID", "Train_No","Column_8","Loco_No"] + list(df.columns[8:])
     # Rearrange the Columns
     df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Column_8","Status", "data"]]
+
+    # Remove Gaps in CMS ID
+    df['CMS_ID'] = df['CMS_ID'].str.replace(' ', '', regex=False)
+
 
     print("Analyzing PDF File, Please Wait.........")
     # message = f"✅ Analysing PDF File, Please Wait........."
@@ -132,14 +141,6 @@ def process_pdf(input_path, output_path):
     df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
     # Drop rows where "Speed" or "Distance" is NaN (non-numeric values)
     df = df.dropna(subset=["Speed", "Distance"])
-
-    try:
-        # Convert to datetime and reformat to DD/MM/YYYY
-        df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%y', errors='coerce')
-        df['Date'] = df['Date'].dt.strftime('%d/%m/%Y')  # Output format as string
-
-    except Exception as e:
-        print(f"⚠️ Failed to convert date format: {e}")
 
 # Function to clean and convert the text to time format ..........................................................................................
     def clean_and_convert_time(time_str):
@@ -158,7 +159,6 @@ def process_pdf(input_path, output_path):
 
 # Cumulate the value of 'Distance' based on the Start & Stop .................................................................................
     df['Distance'] = pd.to_numeric(df['Distance'], errors='coerce')
-
     # Drop rows where 'Distance' is NaN
     df = df.dropna(subset=['Distance'])
     df['Cum_Dist_Run'] = df.groupby(df['Speed'].eq(0).cumsum())['Distance'].cumsum()
@@ -188,12 +188,15 @@ def process_pdf(input_path, output_path):
 #  Delete Short Run ........................................................................................
 #     df = df[df['Run_No'] >= 10].reset_index(drop=True)
 
-# Create a new column 'Pin_Point' with value "10 Meters" for the rows closest to 10 in each 'Run_No' group .........................................................
-    df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 10).idxmin()) == df.index, '10 Meters', '')
-    # Update 'Pin_Point' column with other values
-    df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 250).idxmin()) == df.index, '250 Meters', df['Pin_Point'])
-    df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 500).idxmin()) == df.index, '500 Meters', df['Pin_Point'])
-    df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 1000).idxmin()) == df.index, '1000 Meters', df['Pin_Point'])
+# # Create a new column 'Pin_Point' with value "10 Meters" for the rows closest to 10 in each 'Run_No' group .........................................................
+    df['Pin_Point'] = ''
+    for dist, label in [(10, '10 Meters'), (250, '250 Meters'), (500, '500 Meters'), (1000, '1000 Meters')]:
+        idxs = (
+            df.groupby(['Run_No', 'CMS_ID'])['Rev_Dist']
+            .apply(lambda x: (x - dist).abs().idxmin())
+        )
+        df.loc[idxs.values, 'Pin_Point'] = label
+
 
 # Add BFT Column ......................................................................................................................
     df['Speed_shift'] = df['Speed'].shift(-1)
@@ -269,30 +272,47 @@ def process_pdf(input_path, output_path):
     
  # Rearrange the Columns
     df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Cum_Dist_Run","Cum_Dist_LP","Run_No","Run_Sum","Rev_Dist","Pin_Point","BFT","BFT_END","BPT","BPT_END","BFT_BPT"]]
+
+
 # Adding a new column 'Crew Name' , 'CLI Name', 'Desig'............................................................................................................................
     try:
-        cms_file_path = 'CMS_Data.xlsx'
+        # Construct path relative to this script
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        cms_file_path = os.path.join(base_dir, "CMS_Data.xlsx")
+        
         cms_df = pd.read_excel(cms_file_path)
 
-        # Your existing mapping logic using the CMS data
+        # Normalize CMS_IDs to avoid mismatch due to leading/trailing spaces
+        df['CMS_ID'] = df['CMS_ID'].astype(str).str.strip()
+        cms_df[cms_df.columns[0]] = cms_df[cms_df.columns[0]].astype(str).str.strip()
+
+        # Map values safely
         df['Crew_Name'] = df['CMS_ID'].map(cms_df.set_index(cms_df.columns[0])[cms_df.columns[1]])
-        df['Nom_CLI'] = df['CMS_ID'].map(cms_df.set_index(cms_df.columns[0])[cms_df.columns[4]])
         df['Desig'] = df['CMS_ID'].map(cms_df.set_index(cms_df.columns[0])[cms_df.columns[2]])
+        df['Nom_CLI'] = df['CMS_ID'].map(cms_df.set_index(cms_df.columns[0])[cms_df.columns[4]])
 
     except FileNotFoundError:
-        # File not found handling: Create columns with null values
+        print("❌ CMS_Data.xlsx not found in script directory.")
         df['Crew_Name'] = None
         df['Nom_CLI'] = None
         df['Desig'] = None
 
 
 
+
     df.to_excel(output_path, index=False)
     print(f"✅ File saved to {output_path}")
 if __name__ == "__main__":
+    import traceback
+
     if len(sys.argv) != 3:
         print("Usage: python telpro_pdf.py <input_pdf_path> <output_excel_path>")
     else:
         input_pdf = sys.argv[1]
         output_excel = sys.argv[2]
-        process_pdf(input_pdf, output_excel)
+        try:
+            process_pdf(input_pdf, output_excel)
+        except Exception as e:
+            print("❌ Error while processing PDF:")
+            traceback.print_exc()
+

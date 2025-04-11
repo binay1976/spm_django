@@ -100,7 +100,10 @@ def process_medha(file_path):
         # Convert certain columns to numeric format .................................................................................................
         numeric_columns = ['Speed', 'Distance','Loco_No']
         df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
-        df = df.dropna(subset=["Speed", "Distance"])   
+        df = df.dropna(subset=["Speed", "Distance"]) 
+
+            # Remove Gaps in CMS ID
+        df['CMS_ID'] = df['CMS_ID'].str.replace(' ', '', regex=False)  
 
         # Cumulate the value of 'Distance' based on the Start & Stop .................................................................................
         # Convert 'Distance' column to numeric, coercing errors to NaN
