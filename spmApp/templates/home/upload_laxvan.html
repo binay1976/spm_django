@@ -4,7 +4,7 @@
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Telpro PDF File</title>
+    <title>Laxven Processor</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="relative min-h-screen flex items-center justify-center bg-gray-100 text-gray-900">
@@ -28,7 +28,7 @@
 
         <!-- Upload File Section (Right) -->
         <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md text-center">
-            <h2 class="text-2xl font-semibold mb-4 text-cyan-700">Laxvan File Processor</h2>
+            <h2 class="text-2xl font-semibold mb-4 text-cyan-700">Laxven File Processor</h2>
 
             <!-- Status Message -->
             {% if message %}
@@ -40,11 +40,22 @@
                 {% csrf_token %}x
 
                 <div class="mb-4">
-                    <label class="block text-left font-medium text-gray-700">Select Laxvan Excel File:</label>
+                    <label class="block text-left font-medium text-gray-700">Select Laxven text File:</label>
                     <input type="file" id="fileInput" name="file" class="mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300" required>
                 </div>
+                
+                <div class="mb-4">
+                    <input type="text" id="cms_id" name="cms_id" placeholder = "Enter CMS ID: Uppercase no space" class="mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300" required>
+                </div>
+                <div class="mb-4">
+                    <input type="text" id="train_no" name="train_no" placeholder = "Enter Train No:" class="mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300" required>
+                </div>
+                <div class="mb-4">
+                    <input type="number" id="loco_no" name="loco_no" placeholder = "Enter Loco No:" class="mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300" required>
+                </div>
+                
 
-                <button type="submit" class="w-full bg-cyan-600 text-white py-2 rounded-md hover:bg-green-500 transition">Upload & Process 🚀🚀🚀</button>
+                <button type="submit" class="w-full bg-cyan-600 text-white py-2 rounded-md hover:bg-green-500 transition">Upload $ Process</button>
             </form>
 
             <!-- Loading GIF & Text -->

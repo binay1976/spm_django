@@ -226,9 +226,11 @@ def process_medha(file_path):
         df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Cum_Dist_Run","Cum_Dist_LP","Run_No","Run_Sum","Rev_Dist","Pin_Point","BFT","BPT","BFT_BPT"]]
 
 
-    # Adding a new column 'Crew Name' , 'CLI Name', 'Desig'............................................................................................................................
+    # Adding a new column 'Crew Name' , 'CLI Name', 'Desig' etc............................................................................................................................
         try:
-            cms_file_path = 'CMS_Data.xlsx'
+            # Construct path relative to this script
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            cms_file_path = os.path.join(base_dir, "CMS_Data.xlsx")
             cms_df = pd.read_excel(cms_file_path)
 
             # Your existing mapping logic using the CMS data

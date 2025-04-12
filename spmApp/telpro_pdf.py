@@ -269,11 +269,6 @@ def process_pdf(input_path, output_path):
     axis=1
     ).str.strip()
 
-    
- # Rearrange the Columns
-    df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Cum_Dist_Run","Cum_Dist_LP","Run_No","Run_Sum","Rev_Dist","Pin_Point","BFT","BFT_END","BPT","BPT_END","BFT_BPT"]]
-
-
 # Adding a new column 'Crew Name' , 'CLI Name', 'Desig'............................................................................................................................
     try:
         # Construct path relative to this script
@@ -290,6 +285,9 @@ def process_pdf(input_path, output_path):
         df['Crew_Name'] = df['CMS_ID'].map(cms_df.set_index(cms_df.columns[0])[cms_df.columns[1]])
         df['Desig'] = df['CMS_ID'].map(cms_df.set_index(cms_df.columns[0])[cms_df.columns[2]])
         df['Nom_CLI'] = df['CMS_ID'].map(cms_df.set_index(cms_df.columns[0])[cms_df.columns[4]])
+        
+        # Rearrange the Columns
+        df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Crew_Name", "Desig","Nom_CLI","BPT_BFT","Cum_Dist_Run","Cum_Dist_LP","Run_No","Run_Sum","Rev_Dist","Pin_Point","BFT","BFT_END","BPT","BPT_END"]]
 
     except FileNotFoundError:
         print("❌ CMS_Data.xlsx not found in script directory.")

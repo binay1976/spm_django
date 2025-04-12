@@ -23,26 +23,40 @@ def home(request):
 
 # ====Delete Temp files============================================================================================
 def clean_temp_files(request):
-    """Deletes all temporary files in the MEDIA folder that start with 'temp'."""
+    """Deletes all temporary files in MEDIA folder starting with 'temp' and all 'chart' files in spm_live folder."""
     media_path = settings.MEDIA_ROOT
+    spm_live_path = os.path.dirname(os.path.abspath(os.path.join(settings.BASE_DIR, 'manage.py')))
     deleted_files = []
 
+    # Delete temp files from MEDIA folder
     if os.path.exists(media_path):
         for file_name in os.listdir(media_path):
-            if file_name.startswith("temp"):  # Check if file starts with "temp"
+            if file_name.startswith("temp"):
                 file_path = os.path.join(media_path, file_name)
                 try:
-                    os.remove(file_path)  # Delete the file
+                    os.remove(file_path)
                     deleted_files.append(file_name)
                 except Exception as e:
-                    messages.error(request, f"Error deleting {file_name}: {e}")
+                    messages.error(request, f"Error deleting {file_name} from MEDIA: {e}")
+
+    # Delete 'chart' files from spm_live folder
+    if os.path.exists(spm_live_path):
+        for file_name in os.listdir(spm_live_path):
+            if "chart" in file_name:
+                file_path = os.path.join(spm_live_path, file_name)
+                try:
+                    os.remove(file_path)
+                    deleted_files.append(file_name)
+                except Exception as e:
+                    messages.error(request, f"Error deleting {file_name} from spm_live: {e}")
 
     if deleted_files:
-        messages.success(request, f"Deleted {len(deleted_files)} temp files successfully! ✅")
+        messages.success(request, f"Deleted {len(deleted_files)} file(s) successfully! ✅")
     else:
-        messages.info(request, "No temp files found. 😊")
+        messages.info(request, "No matching files found. 😊")
 
     return redirect("/")  # Redirect back to the homepage
+
 
 
 # =====Medha Upload ============================================================================================
@@ -145,7 +159,7 @@ def upload_telpro_pdf(request):
 
 # ======Laxvan Text File============================================================================================
 def upload_laxvan(request):
-    print("🚀 Views.Upload_laxvan running")
+    print("Views.Upload_laxvan running")
     message = None
     processed_file_name = "processed_laxvan.xlsx"
     processed_file_path = os.path.join(settings.MEDIA_ROOT, processed_file_name)
@@ -153,25 +167,36 @@ def upload_laxvan(request):
     if request.method == "POST" and request.FILES.get("file"):
         uploaded_file = request.FILES["file"]
 
+    # Collect form inputs
+        cms_id = request.POST.get("cms_id", "").strip()
+        train_no = request.POST.get("train_no", "").strip()
+        loco_no = request.POST.get("loco_no", "").strip()
+
+        # Validation (optional but recommended)
+        if not cms_id or not train_no or not loco_no:
+            message = "All fields are required!"
+            return render(request, "home/upload_laxvan.html", {"message": message})
+
         # Allow only .txt files
-        if not uploaded_file.name.endswith(".xls"):
-            message = "Error: Only Excel files are allowed!"
+        if not uploaded_file.name.endswith(".txt"):
+            message = "Error: Only .txt files are allowed!"
         else:
             # Save uploaded file temporarily
             temp_file_path = default_storage.save("temp_laxvan.txt", ContentFile(uploaded_file.read()))
             full_temp_path = os.path.join(settings.MEDIA_ROOT, temp_file_path)
 
-            print(f"✅ Uploaded file saved at: {full_temp_path}")
-            print(f"✅ Processed file should be saved at: {processed_file_path}")
+            # print(f"✅ Uploaded file saved at: {full_temp_path}")
+            # print(f"✅ Processed file should be saved at: {processed_file_path}")
 
             # Run `telpro_pdf.py` script
             try:
                 script_path = os.path.join(settings.BASE_DIR, "spmApp", "laxvan.py")
-                subprocess.run([sys.executable, script_path, full_temp_path, processed_file_path], check=True)
+                subprocess.run([sys.executable, script_path, full_temp_path, processed_file_path, cms_id, train_no, loco_no], check=True)
+                
 
                 # Check if file exists after processing
                 if os.path.exists(processed_file_path):
-                    print(f"✅ Processed file FOUND at: {processed_file_path}")
+                    # print(f"✅ Processed file FOUND at: {processed_file_path}")
 
                     # Serve file as an HTTP response for direct download
                     response = FileResponse(open(processed_file_path, "rb"), as_attachment=True)
