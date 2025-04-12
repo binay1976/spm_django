@@ -174,9 +174,12 @@ def medha(self):
         df['Loco_No'] = df['Column 9'].str.replace('Spd Limit', '').str.strip()
 # Function to clean and convert the text to time format ..........................................................................................
         def clean_and_convert_time(time_str):
+            # Remove leading and trailing white spaces
             time_str = time_str.strip()
+            # Use regular expression to find and extract time components
             match = re.match(r'^(\d+):(\d+):(\d+)$', time_str)
             if match:
+                # If the regex pattern matches, extract components and format the time string
                 hour, minute, second = match.groups()
                 return f"{hour.zfill(2)}:{minute.zfill(2)}:{second.zfill(2)}"
             else:
@@ -187,15 +190,15 @@ def medha(self):
         
         # Delete unnecessary columns
         columns_to_delete = ['Column 5', 'Column 6', 'Column 7', 'Column 8', 'Column 9']
-        df.drop(columns=columns_to_delete, inplace=True)
+        df.drop(columns=columns_to_delete, inplace=True)    
+# Convert certain columns to numeric format .................................................................................................
+        numeric_columns = ['Speed', 'Distance','Loco_No']
+        df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
+
         print("Basic Columns Done")
         window.text_box.clear()
         window.text_box.append("50% Processing Done, Plase Wait..........")
         QApplication.processEvents()  # Force UI update
-
-    # Convert certain columns to numeric format .................................................................................................
-        numeric_columns = ['Speed', 'Distance','Loco_No']
-        df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
 # Cumulate the value of 'Distance' based on the Start & Stop ...................................................................................
         cum_distance = 0
         for index, row in df.iterrows():
@@ -214,6 +217,7 @@ def medha(self):
             else:
                 cum_distance += df.loc[i, 'Distance']
             df.loc[i, 'Cum_Dist_LP'] = cum_distance
+        print("Cum_Dist_LP Done")
 
 # Create a new column 'Run_No' based on the conditions ...................................................................................
         df['Run_No'] = 1  
@@ -221,9 +225,10 @@ def medha(self):
         distance_reset = df['Cum_Dist_Run'] < df['Cum_Dist_Run'].shift()
         group = cms_change.cumsum()
         df['Run_No'] = distance_reset.groupby(group).cumsum() + 1
+        print("Run_No Done")
 
 # Remove entire rows where 'CMS ID' contains 0........................................................................
-        df = df[df['CMS_ID'] != '0']
+        # df = df[df['CMS_ID'] != '0']
 
 # Insert a new column 'Run_Sum' with the sum of 'Distance' per 'Run_No' ....................................................................
         df['Run_Sum'] = df.groupby(['Run_No','CMS_ID'])['Distance'].transform('sum')
@@ -236,7 +241,7 @@ def medha(self):
         df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 250).idxmin()) == df.index, '250 Meters', df['Pin_Point'])
         df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 500).idxmin()) == df.index, '500 Meters', df['Pin_Point'])
         df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 1000).idxmin()) == df.index, '1000 Meters', df['Pin_Point'])
-
+        print("Pin Point Done")
 # Add BFT Column ......................................................................................................................
         df['Speed_shift'] = df['Speed'].shift(-1)
         unique_cms_ids = set()
@@ -247,8 +252,8 @@ def medha(self):
                     return 'BFT'
             return ''
         df['BFT'] = df.apply(add_bft, axis=1)
-
-    # Add BPT Column...............................................................................................................................
+        print("BFT Column Done")
+# Add BPT Column...............................................................................................................................
         unique_cms_ids = set()
         def add_bpt(row):
             if row['Cum_Dist_LP'] < 10000 and 40 <= row['Speed'] <= 90 and row['Speed'] > row['Speed_shift']:
@@ -260,8 +265,8 @@ def medha(self):
 
         # Reset shift column for comparison
         df['Speed_shift'] = df['Speed'].shift(1)
-
-    # BFT_END .............................................................................................................................
+        print("BPT Column Done")
+# BFT_END .............................................................................................................................
         def get_bft_end(df):
             df['BFT_END'] = ''
             for cms_id, group in df.groupby('CMS_ID'):
@@ -276,7 +281,8 @@ def medha(self):
                                 df.loc[group.loc[end_idx, 'index'], 'BFT_END'] = 'BFT_END'
                             break
             return df
-    # BPT_END ..............................................................................................................................
+        print("BFT_END Column Done")
+# BPT_END ..............................................................................................................................
         def get_bpt_end(df):
             df['BPT_END'] = ''
             for cms_id, group in df.groupby('CMS_ID'):
@@ -291,6 +297,7 @@ def medha(self):
                                 df.loc[group.loc[end_idx, 'index'], 'BPT_END'] = 'BPT_END'
                             break
             return df
+        print("BPT_END Column Done")
         
         # Apply end marking functions
         df = get_bft_end(df)
@@ -302,14 +309,15 @@ def medha(self):
         window.text_box.append("75% Processing Done, Plase Wait..........")
         QApplication.processEvents()  # Force UI update
 
-    # Adding a new column 'BFT_BPT' ............................................................................................................................
+# # Adding a new column 'BFT_BPT' ............................................................................................................................
         df['BFT_BPT'] = df.apply(lambda row: 
-        (str(row['BFT']) if pd.notna(row['BFT']) and row['BFT'] != '' else '') +
-        (' ' + str(row['BPT']) if pd.notna(row['BPT']) and row['BPT'] != '' else '') +
-        (' ' + str(row['BFT_END']) if pd.notna(row['BFT_END']) and row['BFT_END'] != '' else '') +
-        (' ' + str(row['BPT_END']) if pd.notna(row['BPT_END']) and row['BPT_END'] != '' else ''),
-        axis=1
-        ).str.strip()
+            (str(row['BFT']) if pd.notna(row['BFT']) and row['BFT'] != '' else '') +
+            (' ' + str(row['BPT']) if pd.notna(row['BPT']) and row['BPT'] != '' else '') +
+            (' ' + str(row['BFT_END']) if pd.notna(row['BFT_END']) and row['BFT_END'] != '' else '') +
+            (' ' + str(row['BPT_END']) if pd.notna(row['BPT_END']) and row['BPT_END'] != '' else ''),
+            axis=1
+            ).str.strip()
+
         print(df.head())
 # Adding a new column 'Crew Name' , 'CLI Name', 'Desig'............................................................................................................................
         try:
@@ -338,55 +346,29 @@ def medha(self):
 
 
         # Rearrange the Columns
-        df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Crew_Name","Nom_CLI","Desig","BFT","BFT_END","BPT","BPT_END","BFT_BPT","Cum_Dist_Run","Cum_Dist_LP","Run_No","Run_Sum","Rev_Dist","Pin_Point"]]
+        df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Crew_Name","Nom_CLI","Desig","BFT","BFT_END","BPT","BPT_END","BFT_BPT",
+                 "Cum_Dist_Run","Cum_Dist_LP","Run_No","Run_Sum","Rev_Dist","Pin_Point"]]
 
+ # Save Data to Excel
+        options = QFileDialog.Options() 
         save_path, _ = QFileDialog.getSaveFileName(None, "Save Processed Data", "", "Excel Files (*.xlsx)", options=options)
 
         # Check if a save location was selected
         if save_path:
-            # Save the processed data as a new Excel file
-            with pd.ExcelWriter(save_path, engine='openpyxl') as excel_writer:
-                df.to_excel(excel_writer, sheet_name='Data_Base', index=False)
-                df_bpt.to_excel(excel_writer, sheet_name='Results', index=False)
-
-                worksheet = excel_writer.sheets['Results']
-                for idx, col in enumerate(df_bpt.columns):
-                    worksheet.cell(1, idx+1, col)
-
-                # Find the last blank row in the 'Results' sheet
-                last_blank_row = 1
-                for row in worksheet.iter_rows(min_row=1, max_row=worksheet.max_row, min_col=1, max_col=1):
-                    if not row[0].value:
-                        last_blank_row = row[0].row
-
-                # Write df_bpt with its header starting after the last blank row
-                for row in dataframe_to_rows(df_results, index=False, header=True):
-                    worksheet.append(row)
-
-                # Bold and fill with yellow color for the header of df_results
-                header_fill = PatternFill(start_color='FFFF00', end_color='FFFF00', fill_type='solid')
-                header_font = Font(bold=True)
-                for cell in worksheet[1]:
-                    cell.fill = header_fill
-                    cell.font = header_font
-                    cell.alignment = Alignment(horizontal='center', vertical='center')
-
-                # Bold and fill with yellow color for the header of df_bpt
-                df_bpt_start_row = df_bpt.shape[0] + 6  # Start row for df_bpt data
-                for cell in worksheet[df_bpt_start_row]:
-                    cell.fill = header_fill
-                    cell.font = header_font
-                    cell.alignment = Alignment(horizontal='center', vertical='center')
-
+            # Save the processed data to a single sheet "DataBase"
+            df.to_excel(save_path, sheet_name="DataBase", index=False, engine="openpyxl")
             print("File saved successfully.")
             window.text_box.clear()
-            window.text_box.append("Done Successfully!!!, Click On Analyse Data...")
+            window.text_box.append("Done Successfully!!!, Ready For Visual Analysis or Quick Report...")
             QApplication.processEvents()  # Force UI update
         else:
             print("Save canceled.")
             window.text_box.clear()
             window.text_box.append("Process Aborted...!!!!")
             QApplication.processEvents()  # Force UI update
+        
+        # print(df)
+        return df
 
 
 # ========TELPRO PDF=======================================================================================================================================================
@@ -403,6 +385,8 @@ def telpro():
         window.text_box.clear()
         window.text_box.append("No file selected.")
         QApplication.processEvents()  # Force UI update
+
+
 def process_pdf(pdf_path):
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     all_data = []
@@ -565,15 +549,6 @@ def process_pdf(pdf_path):
             return None
     df['Time'] = df['Time'].apply(clean_and_convert_time)
 
-     # Convert certain columns to Date format .................................................................................................
-    try:
-        # Convert to datetime and reformat to DD/MM/YYYY
-        df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%y', errors='coerce')
-        df['Date'] = df['Date'].dt.strftime('%d/%m/%Y')  # Output format as string
-
-    except Exception as e:
-        window.text_box.append(f"⚠️ Failed to convert date format: {e}")
-
 # Cumulate the value of 'Distance' based on the Start & Stop .................................................................................
     # Convert 'Distance' column to numeric, coercing errors to NaN
     df['Distance'] = pd.to_numeric(df['Distance'], errors='coerce')
@@ -612,11 +587,26 @@ def process_pdf(pdf_path):
 #     df = df[df['Run_No'] >= 10].reset_index(drop=True)
 
 # Create a new column 'Pin_Point' with value "10 Meters" for the rows closest to 10 in each 'Run_No' group .........................................................
-    df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 10).idxmin()) == df.index, '10 Meters', '')
-    # Update 'Pin_Point' column with other values
-    df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 250).idxmin()) == df.index, '250 Meters', df['Pin_Point'])
-    df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 500).idxmin()) == df.index, '500 Meters', df['Pin_Point'])
-    df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 1000).idxmin()) == df.index, '1000 Meters', df['Pin_Point'])
+    # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 10).idxmin()) == df.index, '10 Meters', '')
+    # # Update 'Pin_Point' column with other values
+    # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 250).idxmin()) == df.index, '250 Meters', df['Pin_Point'])
+    # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 500).idxmin()) == df.index, '500 Meters', df['Pin_Point'])
+    # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 1000).idxmin()) == df.index, '1000 Meters', df['Pin_Point'])
+    # Initialize the column
+    df['Pin_Point'] = ''
+
+    # Dictionary of target distances and their labels
+    targets = {
+        10: '10 Meters',
+        250: '250 Meters',
+        500: '500 Meters',
+        1000: '1000 Meters'
+    }
+
+    # Loop through each target and label the closest point in each group
+    for dist, label in targets.items():
+        closest_indices = df.groupby(['Run_No', 'CMS_ID'])['Rev_Dist'].apply(lambda x: (x - dist).abs().idxmin())
+        df.loc[closest_indices.values, 'Pin_Point'] = label
 
 # Add BFT Column ......................................................................................................................
     df['Speed_shift'] = df['Speed'].shift(-1)
@@ -734,16 +724,17 @@ def process_pdf(pdf_path):
     return df
 
 
+
 # =========== Laxvan =====================================================================================================
 options = QFileDialog.Options()
 def hide_group_box(group_box):
     if group_box:
         group_box.hide()
-
-def laxvan_and_hide(cms_id_input,train_no_input,loco_no_input,process_button):
+def laxvan_and_hide(cms_id_input,loco_no_input,train_no_input,process_button):
     print("CMS ID:", cms_id_input.text())
-    print("Train No:", train_no_input.text())
     print("Loco No:", loco_no_input.text())
+    print("Train No:", train_no_input.text())
+    
     process_button.hide()
     
 
@@ -813,14 +804,10 @@ def laxvan_and_hide(cms_id_input,train_no_input,loco_no_input,process_button):
 
 
     try:
-        # Step 1: Identify the first column (assumes it's the datetime column)
         first_col = df.columns[0]
-        # Step 2: Clean whitespace and split into Date and Time
         datetime_split = df[first_col].astype(str).str.strip().str.split(' ', n=1, expand=True)
-        # Step 3: Assign new columns
         df['Date'] = datetime_split[0]
         df['Time'] = datetime_split[1]
-        # Step 4: Drop the original datetime column
         df.drop(columns=[first_col], inplace=True)
 
     except Exception as e:
@@ -828,10 +815,10 @@ def laxvan_and_hide(cms_id_input,train_no_input,loco_no_input,process_button):
 
     # Adding new columns with blank data
     df['CMS_ID'] = cms_id_input.text()
-    df['Train_No'] = train_no_input.text()
     df['Loco_No'] = loco_no_input.text()
+    df['Train_No'] = train_no_input.text()
+    
     df.rename(columns={'Km/hr': 'Speed'}, inplace=True)
-
     # Rearrange columns as "Date, Time, Speed, Distance, Train_No"............
     df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No"]]
 
@@ -841,10 +828,9 @@ def laxvan_and_hide(cms_id_input,train_no_input,loco_no_input,process_button):
     QApplication.processEvents()  # Force UI update
 
 # .....Basic Columns Done..............................................................................................................................
-     # Trim white spaces from all string columns
     df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
 
-    # Convert certain columns to numeric format .................................................................................................
+# Convert certain columns to numeric format .................................................................................................
     numeric_columns = ['Speed', 'Distance', 'Loco_No']
     df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
     # Drop rows where "Speed" or "Distance" is NaN (non-numeric values)
@@ -860,37 +846,26 @@ def laxvan_and_hide(cms_id_input,train_no_input,loco_no_input,process_button):
 
 # Function to clean and convert the text to time format ..........................................................................................
     def clean_and_convert_time(time_str):
-        # Remove leading and trailing white spaces
         time_str = time_str.strip()
-        # Use regular expression to find and extract time components
         match = re.match(r'^(\d+):(\d+):(\d+)$', time_str)
         if match:
-            # If the regex pattern matches, extract components and format the time string
             hour, minute, second = match.groups()
             return f"{hour.zfill(2)}:{minute.zfill(2)}:{second.zfill(2)}"
         else:
-            # If the regex pattern doesn't match, return None (or handle as desired)
             return None
     df['Time'] = df['Time'].apply(clean_and_convert_time)
 
 # Cumulate the value of 'Distance' based on the Start & Stop .................................................................................
     # Convert 'Distance' column to numeric, coercing errors to NaN
     df['Distance'] = pd.to_numeric(df['Distance'], errors='coerce')
-
-    # Drop rows where 'Distance' is NaN
     df = df.dropna(subset=['Distance'])
     df['Cum_Dist_Run'] = df.groupby(df['Speed'].eq(0).cumsum())['Distance'].cumsum()
 
 # Create a new column 'Run_No' based on the conditions ...................................................................................
-    # Initialize 'Run_No' as 1
     df['Run_No'] = 1  
-    # Identify when 'CMS_ID' changes
     cms_change = df['CMS_ID'] != df['CMS_ID'].shift()
-    # Identify when 'Cum_Dist_Run' decreases within the same CMS_ID
     distance_reset = df['Cum_Dist_Run'] < df['Cum_Dist_Run'].shift()
-    # Create a new group every time CMS_ID changes
     group = cms_change.cumsum()
-    # Compute Run_No within each CMS_ID group, starting from 1
     df['Run_No'] = distance_reset.groupby(group).cumsum() + 1
 
 # Cumulate the value of 'Distance' based on the Start & Stop .................................................................................
@@ -986,13 +961,10 @@ def laxvan_and_hide(cms_id_input,train_no_input,loco_no_input,process_button):
 
 # Rearrange the Columns
     df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Cum_Dist_Run","Cum_Dist_LP","Run_No","Run_Sum","Rev_Dist","Pin_Point","BFT","BFT_END","BPT","BPT_END","BFT_BPT"]]
-
-
 # Adding a new column 'Crew Name' , 'CLI Name', 'Desig'............................................................................................................................
     try:
         cms_file_path = 'CMS_Data.xlsx'
         cms_df = pd.read_excel(cms_file_path)
-
         # Your existing mapping logic using the CMS data
         df['Crew_Name'] = df['CMS_ID'].map(cms_df.set_index(cms_df.columns[0])[cms_df.columns[1]])
         df['Nom_CLI'] = df['CMS_ID'].map(cms_df.set_index(cms_df.columns[0])[cms_df.columns[4]])
@@ -1064,7 +1036,9 @@ def laxvan():
     instruction_label.setStyleSheet("color: red; font-size: 20px;")
     instruction_label.setWordWrap(True)
     
-    process_button.clicked.connect(partial(laxvan_and_hide, cms_id_input, loco_no_input, train_no_input,process_button))
+    # process_button.clicked.connect(partial(laxvan_and_hide, cms_id_input, train_no_input,loco_no_input, process_button))
+    process_button.clicked.connect(partial(laxvan_and_hide, cms_id_input, loco_no_input, train_no_input, process_button))
+
     process_button.clicked.connect(lambda:hide_group_box(group_box))
     # process_button.clicked.connect(lambda: laxvan_and_hide(cms_id_input, loco_no_input, train_no_input))
     group_box.show()           
@@ -1357,7 +1331,6 @@ def save_to_pdf(cms_id, train_no, loco_no, total_distance , avg_speed, total_dur
     sum_max_speed = max_speed.groupby('Run_No')['Speed'].sum().reset_index()
     max_sum_max_speed_index = sum_max_speed['Speed'].idxmax()
     fig = px.bar(sum_max_speed, x="Run_No", y="Speed", text="Speed")  # Add text="Speed"
-    # Set Bar Colors
     colors = ['#05B7B7'] * len(sum_max_speed)  # Light blue for most bars
     if max_sum_max_speed_index >= 0:
         colors[max_sum_max_speed_index] = '#854c03'  # Brown for the highest bar
@@ -1373,11 +1346,9 @@ def save_to_pdf(cms_id, train_no, loco_no, total_distance , avg_speed, total_dur
     chart_path = "max_speed_chart.png"
     # Save Chart as Image
     pio.write_image(fig, chart_path, format="png", width=1200, height=600, scale=2)
-    # Add Title to PDF
     pdf.set_font("Arial", style="B", size=14)
     Loco_No = filtered_df["Loco_No"].min()
     pdf.cell(280, 10, f"Top Speed Between Each Halt (CMS_ID: {cms_id} & Loco_No {Loco_No})", ln=True, align='C')
-    # Insert Chart Image into PDF
     pdf.image(chart_path, x=10, y=20, w=285)  # Adjust width for landscape
 
     print("Bar Chart Done")
@@ -1444,13 +1415,10 @@ def save_to_pdf(cms_id, train_no, loco_no, total_distance , avg_speed, total_dur
     # Save Plotly Figure as an Image (PNG)
     graph_path = "speed_chart.png"
     pio.write_image(fig, graph_path, format="png", width=1000, height=500, scale=2)
-    # === Add Graph on Page 4 in Landscape Mode ===
     pdf.add_page(orientation='L')  # Only this page is Landscape
-    # Add title for Graph Page
     pdf.set_font("Arial", style="B", size=14)
     Loco_No = filtered_cms_df["Loco_No"].min()  # Get Loco_No from filtered DataFrame
     pdf.cell(280, 10, f"Report for CMS_ID: {cms_id} & Loco_No {Loco_No}", ln=True, align='C')
-    # Insert image in PDF
     pdf.ln(10)  # Space before image
     pdf.image(graph_path, x=10, y=20, w=285)  # Adjust width for landscape
 
@@ -1459,7 +1427,7 @@ def save_to_pdf(cms_id, train_no, loco_no, total_distance , avg_speed, total_dur
     window.text_box.append("Page-4, Speed-Time Grpah Created.........")
     QApplication.processEvents()
 
-# ==================Create Distance VS Speed Area Graph in PDF instance in portrait mode  ======================================================================= 
+# Create Distance VS Speed Area Graph in PDF instance in portrait mode  ....................................................................
     filtered_cms_df = filtered_df[filtered_df["CMS_ID"] == cms_id].copy()
 
     # Sort DataFrame by Distance Traveled
@@ -1586,7 +1554,11 @@ def save_to_pdf(cms_id, train_no, loco_no, total_distance , avg_speed, total_dur
     bft_end_dist = bft_end_filtered["Cum_Dist_LP"].iloc[0] if not bft_end_filtered.empty else "N/A"
     bft_end_speed = bft_end_filtered["Speed"].iloc[0] if not bft_end_filtered.empty else "N/A"
 
-    bft_total_dist = bft_end_dist - bft_dist
+    try:
+        bft_total_dist = float(bft_end_dist) - float(bft_dist)
+    except (TypeError, ValueError):
+        bft_total_dist = "Improper BFT"  # Handle cases where conversion fails
+
 
     # Data for Filter values where 'BPT' column contains 'BPT'
     bpt_filtered = filtered_df[filtered_df["BPT"] == "BPT"]
@@ -1599,8 +1571,10 @@ def save_to_pdf(cms_id, train_no, loco_no, total_distance , avg_speed, total_dur
     bpt_end_dist = bpt_end_filtered["Cum_Dist_LP"].iloc[0] if not bpt_end_filtered.empty else "N/A"
     bpt_end_speed = bpt_end_filtered["Speed"].iloc[0] if not bpt_end_filtered.empty else "N/A"
 
-    bpt_total_dist = bpt_end_dist - bpt_dist
-
+    try:
+        bpt_total_dist = float(bpt_end_dist) - float(bpt_dist)
+    except (TypeError, ValueError):
+        bpt_total_dist = "Improper BPT"  # Handle cases where conversion fails
     # Create Table Header--------------------------------------------------------------------------------------
     pdf.set_font("Arial", style="B", size=10)
     pdf.cell(35, 10, "Test Done", border=1, align="C")
@@ -1636,8 +1610,7 @@ def save_to_pdf(cms_id, train_no, loco_no, total_distance , avg_speed, total_dur
     pdf.ln(20)
     pdf.cell(280, 10, f"Note:- All Distances are Shown in Meters", ln=True, align="L")
 
-
-# =====BPT BFT Done line Chart ======================================================================================
+# BPT BFT Done line Chart ..........................................................................................
     data_base = filtered_df[filtered_df['Cum_Dist_LP'] < 10000]
     bft = data_base[data_base['BFT_BPT'] == "BFT"]
     bpt = data_base[data_base['BFT_BPT'] == "BPT"]
@@ -1726,7 +1699,7 @@ def save_to_pdf(cms_id, train_no, loco_no, total_distance , avg_speed, total_dur
     window.text_box.clear()
     window.text_box.append("Page-6,BPT-BFT chart Created..........")
     QApplication.processEvents()
-# ============Cumulative Graph ================================================================================================================
+# Cumulative Graph ..............................................................................
     filtered_cms_df = filtered_df.sort_values(by="Time")
     start_time = filtered_cms_df["Time"].min()
     end_time = filtered_cms_df["Time"].max()
@@ -1776,7 +1749,6 @@ def save_to_pdf(cms_id, train_no, loco_no, total_distance , avg_speed, total_dur
     # Save Plot as Image
     graph_path = "cumulative_distance_chart.png"
     pio.write_image(fig, graph_path, format="png", width=1000, height=500, scale=2)
-    # === Add Graph on Page 4 in Landscape Mode ===
     pdf.add_page(orientation='L')  # Landscape Page
     # Add Title
     pdf.set_font("Arial", style="B", size=14)
@@ -1790,7 +1762,7 @@ def save_to_pdf(cms_id, train_no, loco_no, total_distance , avg_speed, total_dur
     window.text_box.clear()
     window.text_box.append("Page-7, Cumulative Speed Created..........")
     QApplication.processEvents()
-# =======Run Number Wise Table ====================================================================================================
+# Run Number Wise Table......................................................................................................
     pdf.add_page(orientation='L')  # Switch to landscape for better table fit
     pdf.set_font("Arial", style="B", size=14)
     pdf.cell(280, 10, f"Run Details Table for CMS_ID: {cms_id}", ln=True, align='C')
@@ -1853,10 +1825,8 @@ def save_to_pdf(cms_id, train_no, loco_no, total_distance , avg_speed, total_dur
     window.text_box.append("Page-8, Run Details Table Created..........")
     QApplication.processEvents()
 
-# =======Braking Pattern Chart ====================================================================================================
+# Braking Pattern Chart ...............................................................................................
     braking_df = filtered_df[filtered_df["Rev_Dist"] < 1100].copy()
-    # run_numbers = braking_df["Run_No"].unique()
-    # Filter Run_No values where Run_Sum > 50
     valid_run_numbers = braking_df[braking_df["Run_Sum"] > 50]["Run_No"].unique()
 
     for run_no in valid_run_numbers:
@@ -1948,29 +1918,6 @@ def save_to_pdf(cms_id, train_no, loco_no, total_distance , avg_speed, total_dur
     window.text_box.clear()
     QApplication.processEvents()  # Force UI update
     window.text_box.append(f"PDF saved at {file_path}")
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

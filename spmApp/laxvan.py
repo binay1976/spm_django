@@ -149,7 +149,7 @@ def process_medha(file_path):
 
     # Adding a new column 'BFT' to compare the speed with the previous row .......................................................................
         def add_bft_bpt(row):
-            if row['Cum_Dist_Run'] < 10000 and 15 <= row['Speed'] <= 18 and row['Speed'] > row['Speed_shift']:
+            if row['Cum_Dist_Run'] < 10000 and 12 <= row['Speed'] <= 18 and row['Speed'] > row['Speed_shift']:
                 if row['Speed'] == max(row['Speed'], row['Speed_shift']):
                     if row['CMS_ID'] not in unique_cms_ids:
                         unique_cms_ids.add(row['CMS_ID'])

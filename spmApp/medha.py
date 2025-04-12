@@ -138,17 +138,24 @@ def process_medha(file_path):
         df = df[df['Run_No'] >= 10].reset_index(drop=True)
 
     # Create a new column 'Pin_Point' with value "10 Meters" for the rows closest to 10 in each 'Run_No' group .........................................................
-        df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 10).idxmin()) == df.index, '10 Meters', '')
-        # Update 'Pin_Point' column with other values
-        df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 250).idxmin()) == df.index, '250 Meters', df['Pin_Point'])
-        df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 500).idxmin()) == df.index, '500 Meters', df['Pin_Point'])
-        df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 1000).idxmin()) == df.index, '1000 Meters', df['Pin_Point'])
+        # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 10).idxmin()) == df.index, '10 Meters', '')
+        # # Update 'Pin_Point' column with other values
+        # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 250).idxmin()) == df.index, '250 Meters', df['Pin_Point'])
+        # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 500).idxmin()) == df.index, '500 Meters', df['Pin_Point'])
+        # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 1000).idxmin()) == df.index, '1000 Meters', df['Pin_Point'])
+        df['Pin_Point'] = ''
+        for dist, label in [(10, '10 Meters'), (250, '250 Meters'), (500, '500 Meters'), (1000, '1000 Meters')]:
+            idxs = (
+                df.groupby(['Run_No', 'CMS_ID'])['Rev_Dist']
+                .apply(lambda x: (x - dist).abs().idxmin())
+            )
+            df.loc[idxs.values, 'Pin_Point'] = label
 
 # Add BFT Column ......................................................................................................................
         df['Speed_shift'] = df['Speed'].shift(-1)
         unique_cms_ids = set()
         def add_bft(row):
-            if row['Cum_Dist_LP'] < 10000 and 15 <= row['Speed'] <= 18 and row['Speed'] > row['Speed_shift']:
+            if row['Cum_Dist_LP'] < 10000 and 12 <= row['Speed'] <= 18 and row['Speed'] > row['Speed_shift']:
                 if row['CMS_ID'] not in unique_cms_ids:
                     unique_cms_ids.add(row['CMS_ID'])
                     return 'BFT'

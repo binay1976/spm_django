@@ -202,7 +202,7 @@ def process_pdf(input_path, output_path):
     df['Speed_shift'] = df['Speed'].shift(-1)
     unique_cms_ids = set()
     def add_bft(row):
-        if row['Cum_Dist_LP'] < 10000 and 15 <= row['Speed'] <= 18 and row['Speed'] > row['Speed_shift']:
+        if row['Cum_Dist_LP'] < 10000 and 12 <= row['Speed'] <= 18 and row['Speed'] > row['Speed_shift']:
             if row['CMS_ID'] not in unique_cms_ids:
                 unique_cms_ids.add(row['CMS_ID'])
                 return 'BFT'
