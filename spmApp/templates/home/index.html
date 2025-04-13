@@ -23,14 +23,14 @@
     </nav>
 
     <div class="relative text-center z-10 flex flex-col items-center">
-        <img src="{% static 'Logo.png' %}" alt="Logo" class="w-40 h-40 mx-auto">
-        <h1 class="text-4xl font-bold">Loco Pilot Driving Skill Analysis</h1>
+        <img src="{% static 'Logo.png' %}" alt="Logo" class="w-20 h-20 mx-auto">
+        <h1 class="text-3xl font-bold">Loco Pilot Driving Skill Analysis</h1>
         <h2 class="text-xl mt-2 text-gray-200">Western Railway, Mumbai Division</h2>
-        <div class="bg-black/50 p-6 rounded-lg shadow-md">
-        <div class="mt-10 grid grid-cols-2 gap-4">
+        <div class="bg-black/30 p-6 rounded-lg shadow-md">
+        <div class="grid grid-cols-2 gap-3">
             <a href="{% url 'spmApp:upload_medha' %}" class="bg-purple-600 px-14 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Process Medha (.txt file)</a>
             <a href="{% url 'spmApp:upload_telpro_pdf' %}" class="bg-blue-600 px-14 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Process telpro (.pdf file)</a>
-            <a href="{% url 'spmApp:upload_laxvan' %}" class="bg-yellow-600 px-14 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Process Laxvan (.txt file)</a>
+            <a href="{% url 'spmApp:upload_laxvan' %}" class="bg-yellow-600 px-14 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Process Laxven (.txt file)</a>
             <a href="https://sites.google.com/view/tro-bct/home?authuser=0" class="bg-pink-400 px-14 py-3 rounded-lg text-lg hover:bg-blue-700 transition">e-TRO</a>
             <a href="{% url 'spmApp:upload_quick_report' %}" class="bg-emerald-900 px-14 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Quick Report</a>
             <a href="https://loco-pilot-driving-skill-analysis.streamlit.app/" target="_blank" class="bg-cyan-600 px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition">Data Visualization</a>
