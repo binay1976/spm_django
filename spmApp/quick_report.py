@@ -46,7 +46,7 @@ def Quick_Report(file_path, selected_cms_id):
         try:
             with open(file_path, 'rb') as f:
                 f.read(1)
-            print("✅ Input file is readable")
+            print(" Input file is readable")
         except Exception as e:
             log_error(f"Cannot read input file: {str(e)}")
             return
@@ -54,7 +54,7 @@ def Quick_Report(file_path, selected_cms_id):
         # Read Excel file
         try:
             df = pd.read_excel(file_path, engine="openpyxl")
-            print(f"✅ Successfully read Excel file with {len(df)} rows")
+            print(f" Successfully read Excel file with {len(df)} rows")
         except Exception as e:
             log_error(f"Error reading Excel file: {str(e)}")
             return
@@ -91,7 +91,7 @@ def Quick_Report(file_path, selected_cms_id):
             log_error(f"No data found for CMS_ID: {selected_cms_id}")
             return
 
-        print(f"✅ Found {len(df)} records for CMS_ID: {selected_cms_id}")
+        print(f" Found {len(df)} records for CMS_ID: {selected_cms_id}")
         
         # Continue with processing
         process_and_save(selected_cms_id, df)
@@ -162,7 +162,7 @@ def process_and_save(cms_id, df):
             print(f"\nProcessed date range: {date_range}")
 
         except Exception as e:
-            print(f"\n❌ Error in date processing: {str(e)}")
+            print(f"\n Error in date processing: {str(e)}")
             print("Detailed error information:")
             import traceback
             traceback.print_exc()
@@ -228,7 +228,7 @@ def process_and_save(cms_id, df):
         )
 
     except Exception as e:
-        print(f"❌ Error in process_and_save: {str(e)}")
+        print(f" Error in process_and_save: {str(e)}")
         raise
 
 def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
@@ -240,7 +240,7 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
         
         # Check if logo exists
         if not os.path.exists(logo_path):
-            print(f"❌ Warning: Logo file not found at {logo_path}")
+            print(f" Warning: Logo file not found at {logo_path}")
         
         # Use consistent file name
         pdf_file_path = os.path.join(MEDIA_FOLDER, "processed_quick_report.pdf")
@@ -317,10 +317,10 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
             for label, value in details:
                 pdf.cell(200, 10, f"{label}: {value}", ln=True, align="L")
             
-            print("✅ Successfully added all content to PDF")
+            print(" Successfully added all content to PDF")
             
         except Exception as e:
-            print(f"❌ Error adding content to PDF: {str(e)}")
+            print(f"Error adding content to PDF: {str(e)}")
             raise
 # ===== Speed Slab Table & Data =====
         pdf.add_page()
@@ -969,14 +969,14 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
 
         # Save the complete PDF
         pdf.output(pdf_file_path)
-        print("✅ PDF generated successfully with all pages")
+        print(" PDF generated successfully with all pages")
 
         # Clean up temporary files
         if os.path.exists(chart_path):
             os.remove(chart_path)
 
     except Exception as e:
-        print(f"❌ Error in save_to_pdf: {str(e)}")
+        print(f" Error in save_to_pdf: {str(e)}")
         raise
 
 def strfdelta(timedelta):

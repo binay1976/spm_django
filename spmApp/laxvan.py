@@ -15,15 +15,15 @@ MEDIA_FOLDER = os.path.join(BASE_DIR, "media")
 # Ensure media folder exists
 if not os.path.exists(MEDIA_FOLDER):
     os.makedirs(MEDIA_FOLDER)
-    print(f"✅ Created media folder at: {MEDIA_FOLDER}")
+    print(f" Created media folder at: {MEDIA_FOLDER}")
 
 def process_laxvan(file_path, output_path, cms_id, train_no, loco_no,messages=None):
     if messages is None:
         messages = []  # Only initialize if not passed from outside
     try:
-        print(f"✅ Processing file: {file_path}")
-        print(f"🧑 CMS_ID: {cms_id}, 🚂 Train No: {train_no}, 🔧 Loco No: {loco_no}")
-        messages.append(f"✅ File processed for Loco No- {loco_no} & CMS ID {cms_id}")
+        print(f" Processing file: {file_path}")
+        print(f"CMS_ID: {cms_id}, Train No: {train_no},Loco No: {loco_no}")
+        messages.append(f" File processed for Loco No- {loco_no} & CMS ID {cms_id}")
             
         encodings_to_try = ["utf-8", "latin-1", "utf-16", "windows-1252"]
         content = None
@@ -50,7 +50,7 @@ def process_laxvan(file_path, output_path, cms_id, train_no, loco_no,messages=No
         col_names = [f"Col_{i+1}" for i in range(num_cols)]
 
         df = pd.DataFrame(data, columns=col_names)
-        messages.append(f"✅ Please wait..... {len(df)} rows processing.")
+        messages.append(f" Please wait..... {len(df)} rows processing.")
 
         # Add extra columns
         df["CMS_ID"] = cms_id
@@ -97,7 +97,7 @@ def process_laxvan(file_path, output_path, cms_id, train_no, loco_no,messages=No
             df['Date'] = pd.to_date(df['Date'], format='%d/%m/%y', errors='coerce')
             
         except Exception as e:
-            print(f"⚠️ Failed to convert date format: {e}")
+            print(f"Failed to convert date format: {e}")
 
     # Function to clean and convert the text to time format ..........................................................................................
         def clean_and_convert_time(time_str):
@@ -115,7 +115,7 @@ def process_laxvan(file_path, output_path, cms_id, train_no, loco_no,messages=No
         df['Distance'] = pd.to_numeric(df['Distance'], errors='coerce')
         df = df.dropna(subset=['Distance'])
         df['Cum_Dist_Run'] = df.groupby(df['Speed'].eq(0).cumsum())['Distance'].cumsum()
-        messages.append(f"✅ Almost Done..... {len(df)} rows processing.")
+        messages.append(f" Almost Done..... {len(df)} rows processing.")
 
     # Create a new column 'Run_No' based on the conditions ...................................................................................
         df['Run_No'] = 1  
@@ -237,8 +237,8 @@ def process_laxvan(file_path, output_path, cms_id, train_no, loco_no,messages=No
             df['Desig'] = df['CMS_ID'].map(cms_df.set_index(cms_df.columns[0])[cms_df.columns[2]])
             df['Nom_CLI'] = df['CMS_ID'].map(cms_df.set_index(cms_df.columns[0])[cms_df.columns[4]])
         except FileNotFoundError:
-            print("❌ CMS_Data.xlsx not found in script directory.")
-            messages.append(f"✅ No Data found for CMS ID -{cms_id} Setting Blank name.")
+            print(" CMS_Data.xlsx not found in script directory.")
+            messages.append(f" No Data found for CMS ID -{cms_id} Setting Blank name.")
             df['Crew_Name'] = None
             df['Nom_CLI'] = None
             df['Desig'] = None
@@ -249,18 +249,18 @@ def process_laxvan(file_path, output_path, cms_id, train_no, loco_no,messages=No
 
 # Save to Excel..................................................................................
         df.to_excel(output_path, index=False)
-        print(f"✅ Processed file saved at: {output_path}")
+        print(f" Processed file saved at: {output_path}")
         return messages
 
     except Exception as e:
-        error_message = f"❌ Error during processing: {str(e)}"
+        error_message = f" Error during processing: {str(e)}"
         print(error_message)
         messages.append(error_message)
         return messages
 
 if __name__ == "__main__":
     if len(sys.argv) < 6:
-        print("❌ Error: Missing arguments!\nUsage: python laxvan.py <input_file> <output_file> <cms_id> <train_no> <loco_no>")
+        print(" Error: Missing arguments!\nUsage: python laxvan.py <input_file> <output_file> <cms_id> <train_no> <loco_no>")
         sys.exit(1)
 
     file_path = sys.argv[1]
@@ -270,12 +270,12 @@ if __name__ == "__main__":
     loco_no = sys.argv[5]
 
     if not os.path.exists(file_path):
-        print(f"❌ Error: Input file '{file_path}' not found!")
+        print(f" Error: Input file '{file_path}' not found!")
         sys.exit(1)
 
     process_laxvan(file_path, output_path, cms_id, train_no, loco_no)
 
     if os.path.exists(output_path):
-        print(f"✅ Final confirmation: {output_path} exists.")
+        print(f" Final confirmation: {output_path} exists.")
     else:
-        print("❌ ERROR: Processed file was not saved!")
+        print(" ERROR: Processed file was not saved!")

@@ -51,14 +51,14 @@ def clean_temp_files(request):
                     messages.error(request, f"Error deleting {file_name} from spm_live: {e}")
 
     if deleted_files:
-        messages.success(request, f"Deleted {len(deleted_files)} file(s) successfully! ✅")
+        messages.success(request, f"Deleted {len(deleted_files)} file(s) successfully!")
     else:
-        messages.info(request, "No matching files found. 😊")
+        messages.info(request, "No matching files found.")
 
     return redirect("/")  # Redirect back to the homepage
 # =====Medha Upload ============================================================================================
 def upload_medha(request):
-    print("🚀 Views.Upload_Medha running")
+    print("Views.Upload_Medha running")
     message = None
     processed_file_name = "processed_medha.xlsx"
     processed_file_path = os.path.join(settings.MEDIA_ROOT, processed_file_name)
@@ -68,14 +68,14 @@ def upload_medha(request):
 
         # Allow only .txt files
         if not uploaded_file.name.endswith(".txt"):
-            message = "❌ Error: Only .txt files are allowed!"
+            message = "Error: Only .txt files are allowed!"
         else:
             # Save uploaded file temporarily
             temp_file_path = default_storage.save("temp_medha.txt", ContentFile(uploaded_file.read()))
             full_temp_path = os.path.join(settings.MEDIA_ROOT, temp_file_path)
 
-            print(f"✅ Uploaded file saved at: {full_temp_path}")
-            print(f"✅ Processed file should be saved at: {processed_file_path}")
+            print(f" Uploaded file saved at: {full_temp_path}")
+            print(f" Processed file should be saved at: {processed_file_path}")
 
             try:
                 # Path to the script
@@ -89,7 +89,7 @@ def upload_medha(request):
                     check=True
                 )
 
-                print("✅ Subprocess STDOUT:")
+                print(" Subprocess STDOUT:")
                 print(result.stdout)
                 if result.stderr:
                     print("⚠️ Subprocess STDERR:")
@@ -97,20 +97,20 @@ def upload_medha(request):
 
                 # Check if output file was created
                 if os.path.exists(processed_file_path):
-                    print(f"✅ Processed file FOUND at: {processed_file_path}")
+                    print(f" Processed file FOUND at: {processed_file_path}")
                     response = FileResponse(open(processed_file_path, "rb"), as_attachment=True)
                     response["Content-Disposition"] = f'attachment; filename="{processed_file_name}"'
                     message = "🚀 Great: File Processed Successfully!"
                     return response
                 else:
-                    print("❌ ERROR: Processed file is missing after execution!")
-                    message = "❌ Error: Processed file not found!"
+                    print(" ERROR: Processed file is missing after execution!")
+                    message = " Error: Processed file not found!"
 
             except subprocess.CalledProcessError as e:
-                print("❌ Subprocess failed:")
+                print(" Subprocess failed:")
                 print(f"STDOUT: {e.stdout}")
                 print(f"STDERR: {e.stderr}")
-                message = f"❌ Error during processing:\n{e.stderr or str(e)}"
+                message = f" Error during processing:\n{e.stderr or str(e)}"
 
     return render(request, "home/upload_medha.html", {"message": message})
 
@@ -128,14 +128,14 @@ def upload_telpro_pdf(request):
 
         # Allow only PDF files
         if not uploaded_file.name.endswith(".pdf"):
-            message = "❌ Error: Only .pdf files are allowed!"
+            message = " Error: Only .pdf files are allowed!"
         else:
             # Save uploaded PDF temporarily
             temp_file_path = default_storage.save("temp_telpro.pdf", ContentFile(uploaded_file.read()))
             full_temp_path = os.path.join(settings.MEDIA_ROOT, temp_file_path)
 
-            print(f"✅ Uploaded PDF saved at: {full_temp_path}")
-            print(f"✅ Processed Excel will be saved at: {processed_file_path}")
+            print(f" Uploaded PDF saved at: {full_temp_path}")
+            print(f" Processed Excel will be saved at: {processed_file_path}")
 
             try:
                 # Call telpro_pdf.py using subprocess and pass input/output paths
@@ -147,7 +147,7 @@ def upload_telpro_pdf(request):
                     check=True
                 )
 
-                print("✅ Subprocess output:")
+                print(" Subprocess output:")
                 print(result.stdout)
                 if result.stderr:
                     print("⚠️ Subprocess stderr:")
@@ -155,19 +155,19 @@ def upload_telpro_pdf(request):
 
                 # Serve the Excel file if created
                 if os.path.exists(processed_file_path):
-                    print("✅ Processed Excel FOUND!")
+                    print(" Processed Excel FOUND!")
                     response = FileResponse(open(processed_file_path, "rb"), as_attachment=True)
                     response["Content-Disposition"] = f'attachment; filename="{processed_file_name}"'
                     return response
                 else:
-                    print("❌ ERROR: Processed Excel file not found!")
-                    message = "❌ Error: Excel file missing after processing!"
+                    print(" ERROR: Processed Excel file not found!")
+                    message = " Error: Excel file missing after processing!"
 
             except subprocess.CalledProcessError as e:
-                print("❌ Subprocess failed:")
+                print(" Subprocess failed:")
                 print(f"STDOUT: {e.stdout}")
                 print(f"STDERR: {e.stderr}")
-                message = f"❌ Error during processing:\n{e.stderr or str(e)}"
+                message = f" Error during processing:\n{e.stderr or str(e)}"
 
     return render(request, "home/upload_telpro_pdf.html", {"message": message})
 
@@ -211,8 +211,8 @@ def upload_laxvan(request):
             temp_file_path = default_storage.save(unique_filename, ContentFile(uploaded_file.read()))
             full_temp_path = os.path.join(settings.MEDIA_ROOT, temp_file_path)
 
-            print(f"✅ Temp file saved at: {full_temp_path}")
-            print(f"✅ Running laxvan.py with: {full_temp_path}, {processed_file_path}, {cms_id}, {train_no}, {loco_no}")
+            print(f" Temp file saved at: {full_temp_path}")
+            print(f" Running laxvan.py with: {full_temp_path}, {processed_file_path}, {cms_id}, {train_no}, {loco_no}")
 
             try:
                 # Run the external script
@@ -229,16 +229,16 @@ def upload_laxvan(request):
 
                 # Check if processed file is created
                 if os.path.exists(processed_file_path):
-                    print(f"✅ Processed file found at: {processed_file_path}")
+                    print(f" Processed file found at: {processed_file_path}")
                     response = FileResponse(open(processed_file_path, "rb"), as_attachment=True)
                     response["Content-Disposition"] = f'attachment; filename="{processed_file_name}"'
                     return response
                 else:
-                    print("❌ ERROR: Processed file is missing after execution!")
+                    print(" ERROR: Processed file is missing after execution!")
                     message = "Error: Processed file not found!"
 
             except subprocess.CalledProcessError as e:
-                print(f"❌ Subprocess failed: {e}")
+                print(f" Subprocess failed: {e}")
                 message = f"Error processing file: {e}"
 
     return render(request, "home/upload_laxvan.html", {"message": message})
@@ -255,7 +255,7 @@ def upload_quick_report(request):
         full_temp_path = None
 
         if not uploaded_file.name.endswith(".xlsx"):
-            message = "❌ Error: Only Excel files are allowed!"
+            message = " Error: Only Excel files are allowed!"
             return render(request, "home/upload_quick_report.html", {"message": message})
 
         try:
@@ -265,8 +265,8 @@ def upload_quick_report(request):
             )
             full_temp_path = os.path.join(settings.MEDIA_ROOT, temp_file_path)
 
-            print(f"✅ Uploaded file saved at: {full_temp_path}")
-            print(f"📌 Selected CMS_ID: {selected_cms_id}")
+            print(f" Uploaded file saved at: {full_temp_path}")
+            print(f"Selected CMS_ID: {selected_cms_id}")
 
             # Run quick_report.py with the uploaded file and selected CMS_ID
             script_path = os.path.join(settings.BASE_DIR, "spmApp", "quick_report.py")
@@ -300,8 +300,8 @@ def upload_quick_report(request):
             # Verify the PDF file
             if os.path.exists(processed_file_path):
                 file_size = os.path.getsize(processed_file_path)
-                print(f"✅ PDF found at: {processed_file_path}")
-                print(f"✅ File size: {file_size} bytes")
+                print(f"PDF found at: {processed_file_path}")
+                print(f"File size: {file_size} bytes")
 
                 if file_size == 0:
                     raise Exception("Generated PDF file is empty")
@@ -322,7 +322,7 @@ def upload_quick_report(request):
                 raise FileNotFoundError(f"PDF file not found at {processed_file_path}")
 
         except Exception as e:
-            print(f"❌ Detailed Error: {str(e)}")
+            print(f"Detailed Error: {str(e)}")
             message = f"Error processing file: {str(e)}"
             # Log the full traceback
             import traceback
@@ -334,9 +334,9 @@ def upload_quick_report(request):
             try:
                 if full_temp_path and os.path.exists(full_temp_path):
                     os.remove(full_temp_path)
-                    print(f"✅ Cleaned up temporary file: {full_temp_path}")
+                    print(f"Cleaned up temporary file: {full_temp_path}")
             except Exception as e:
-                print(f"❌ Error cleaning up temporary file: {str(e)}")
+                print(f"Error cleaning up temporary file: {str(e)}")
 
     return render(request, "home/upload_quick_report.html", {"message": message})
 

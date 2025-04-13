@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import sys
 import re
-
 # Get the base directory of the Django project
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -13,14 +12,14 @@ MEDIA_FOLDER = os.path.join(BASE_DIR, "media")
 # Ensure media folder exists
 if not os.path.exists(MEDIA_FOLDER):
     os.makedirs(MEDIA_FOLDER)
-    print(f"✅ Created media folder at: {MEDIA_FOLDER}")
+    print(f"Medha.py Created : {MEDIA_FOLDER}")
 
 # Processed file path
 PROCESSED_FILE_PATH = os.path.join(MEDIA_FOLDER, "processed_medha.xlsx")
 
 def process_medha(file_path):
     try:
-        print(f"✅ Processing file: {file_path}")
+        print(f"Processing file: {file_path}")
 
         # # Read input file
         # df = pd.read_csv(file_path, delimiter="\t", encoding="utf-8", on_bad_lines="skip")
@@ -32,7 +31,7 @@ def process_medha(file_path):
             except UnicodeDecodeError:
                 continue  # Try next encoding if Unicode error occurs
 
-        # ✅ Data Processing
+        #  Data Processing
         df.columns = ["New Header 1"]
         split_values = df["New Header 1"].str.split("|", expand=True)
         df["Date"] = split_values[0]
@@ -138,11 +137,6 @@ def process_medha(file_path):
         df = df[df['Run_No'] >= 10].reset_index(drop=True)
 
     # Create a new column 'Pin_Point' with value "10 Meters" for the rows closest to 10 in each 'Run_No' group .........................................................
-        # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 10).idxmin()) == df.index, '10 Meters', '')
-        # # Update 'Pin_Point' column with other values
-        # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 250).idxmin()) == df.index, '250 Meters', df['Pin_Point'])
-        # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 500).idxmin()) == df.index, '500 Meters', df['Pin_Point'])
-        # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 1000).idxmin()) == df.index, '1000 Meters', df['Pin_Point'])
         df['Pin_Point'] = ''
         for dist, label in [(10, '10 Meters'), (250, '250 Meters'), (500, '500 Meters'), (1000, '1000 Meters')]:
             idxs = (
@@ -245,29 +239,29 @@ def process_medha(file_path):
         df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Crew_Name", "Desig","Nom_CLI","BFT_BPT","Cum_Dist_Run","Cum_Dist_LP","Run_No","Run_Sum","Rev_Dist","Pin_Point","BFT","BFT_END","BPT","BPT_END"]]
 
 
-# ✅ Save processed file in media folder ==============================================================================
+#  Save processed file in media folder ==============================================================================
         df.to_excel(PROCESSED_FILE_PATH, index=False)
 
-        print(f"✅ Processed file saved at: {PROCESSED_FILE_PATH}")
+        print(f"Processed file saved at: {PROCESSED_FILE_PATH}")
 
     except Exception as e:
-        print(f"❌ Error processing file: {e}")
+        print(f" Error processing file: {e}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("❌ Error: Missing arguments! Usage: python medha.py <input_file>")
+        print(" Error: Missing arguments! Usage: python medha.py <input_file>")
         sys.exit(1)
 
     file_path = sys.argv[1]
 
     if not os.path.exists(file_path):
-        print(f"❌ Error: Input file '{file_path}' not found!")
+        print(f" Error: Input file '{file_path}' not found!")
         sys.exit(1)
 
     process_medha(file_path)
 
-    # ✅ Confirm processed file exists
+    # Confirm processed file exists
     if os.path.exists(PROCESSED_FILE_PATH):
-        print(f"✅ Final confirmation: {PROCESSED_FILE_PATH} exists.")
+        print(f"Final confirmation: {PROCESSED_FILE_PATH} exists.")
     else:
-        print("❌ ERROR: Processed file was not saved!")
+        print(" ERROR: Processed file was not saved!")

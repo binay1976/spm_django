@@ -127,7 +127,7 @@ def process_pdf(input_path, output_path):
 
 
     print("Analyzing PDF File, Please Wait.........")
-    # message = f"✅ Analysing PDF File, Please Wait........."
+    # message = f" Analysing PDF File, Please Wait........."
  # # Columns to be deleted
     columns_to_delete = ["Column_8","data", "Status"]
      # Ensure the columns exist before dropping
@@ -299,7 +299,7 @@ def process_pdf(input_path, output_path):
 
 
     df.to_excel(output_path, index=False)
-    print(f"✅ File saved to {output_path}")
+    print(f" File saved to {output_path}")
 if __name__ == "__main__":
     import traceback
 

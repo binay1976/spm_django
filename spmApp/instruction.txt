@@ -10,7 +10,7 @@
     
 git init
 git add .  
-git commit -m "laxven Done"  
+git commit -m "All Done logo"  
 git push -f # 
 git push --force --set-upstream origin main
 
@@ -50,8 +50,14 @@ Create My env:------------------------------------------------------------------
     https://blog.finxter.com/python-to-exe-without-pyinstaller-a-comprehensive-guide/
     Install Env :- python.exe -m pip install virtualenv
     Create Env:- python -m venv spm_django_env_3.11
-    "C:\Users\ABC\AppData\Local\Programs\Python\Python311\python.exe" -m venv spm_django_env_3.11
-    Activate env :- spm_django_env_3.11\Scripts\activate
+
+    1. ✅ Go to SpmDjango Folder and open as VS Code
+    2. ✅ spm_django_env_3.11\Scripts\activate
+    3. ✅ cd spm_live
+    4. ✅ python manage.py runserver
+    5. ❌ (spm_django_env_3.11) PS C:\Users\ABC\Desktop\SPM\Root\SPM_Analysis_Base\SPM Django\spm_live>
+
+
     Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
 
     https://spm-exe-4vppppw6flwcgtsutagwra.streamlit.app/
