@@ -37,7 +37,7 @@
 
             <!-- FORM -->
             <form id="uploadForm" method="post" enctype="multipart/form-data" class="mt-4" onsubmit="startProcessing()">
-                {% csrf_token %}x
+                {% csrf_token %}
 
                 <div class="mb-4">
                     <label class="block text-left font-medium text-gray-700">Select Laxven text File:</label>
@@ -53,7 +53,6 @@
                 <div class="mb-4">
                     <input type="number" id="loco_no" name="loco_no" placeholder = "Enter Loco No:" class="mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300" required>
                 </div>
-                
 
                 <button type="submit" class="w-full bg-cyan-600 text-white py-2 rounded-md hover:bg-green-500 transition">Upload $ Process</button>
             </form>
@@ -67,7 +66,7 @@
             <!-- Success Message -->
             <div id="successMessage" class="hidden mt-4">
                 <img src="{% static 'thumbsUp.gif' %}" alt="Success" class="mx-auto w-16 h-16">
-                <p class="text-green-600 font-semibold mt-2">File Processed Successfully! 🎉</p>
+                <p class="text-green-600 font-semibold mt-2">Good job !!!! 🎉</p>
             </div>
 
             <!-- Back Button -->

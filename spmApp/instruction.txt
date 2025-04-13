@@ -10,7 +10,7 @@
     
 git init
 git add .  
-git commit -m "railway 2 Push"  
+git commit -m "laxven Done"  
 git push -f # 
 git push --force --set-upstream origin main
 
@@ -34,6 +34,7 @@ Create and install requirement.txt items Manually:--Python 3.13 version---------
     pip install PyPDF2
     pip install pdfplumber
     pip install openpyxl
+    pip install PyPDF2
     pip install requests
     pip install pdfplumber
     pip install gspread
@@ -48,7 +49,7 @@ Create and install requirement.txt items Manually:--Python 3.13 version---------
 Create My env:-------------------------------------------------------------------------------------------------------------
     https://blog.finxter.com/python-to-exe-without-pyinstaller-a-comprehensive-guide/
     Install Env :- python.exe -m pip install virtualenv
-    Create Env:- python3.11 -m venv spm_django_env_3.11
+    Create Env:- python -m venv spm_django_env_3.11
     "C:\Users\ABC\AppData\Local\Programs\Python\Python311\python.exe" -m venv spm_django_env_3.11
     Activate env :- spm_django_env_3.11\Scripts\activate
     Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted

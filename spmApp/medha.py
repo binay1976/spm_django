@@ -222,9 +222,6 @@ def process_medha(file_path):
         axis=1
         ).str.strip()
         
-    # Rearrange the Columns
-        df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Cum_Dist_Run","Cum_Dist_LP","Run_No","Run_Sum","Rev_Dist","Pin_Point","BFT","BPT","BFT_BPT"]]
-
 
     # Adding a new column 'Crew Name' , 'CLI Name', 'Desig' etc............................................................................................................................
         try:
@@ -243,6 +240,9 @@ def process_medha(file_path):
             df['Crew_Name'] = None
             df['Nom_CLI'] = None
             df['Desig'] = None
+
+        # Rearrange the Columns
+        df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Crew_Name", "Desig","Nom_CLI","BFT_BPT","Cum_Dist_Run","Cum_Dist_LP","Run_No","Run_Sum","Rev_Dist","Pin_Point","BFT","BFT_END","BPT","BPT_END"]]
 
 
 # ✅ Save processed file in media folder ==============================================================================

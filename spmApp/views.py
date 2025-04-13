@@ -56,9 +56,6 @@ def clean_temp_files(request):
         messages.info(request, "No matching files found. 😊")
 
     return redirect("/")  # Redirect back to the homepage
-
-
-
 # =====Medha Upload ============================================================================================
 def upload_medha(request):
     print("🚀 Views.Upload_Medha running")
@@ -71,7 +68,7 @@ def upload_medha(request):
 
         # Allow only .txt files
         if not uploaded_file.name.endswith(".txt"):
-            message = "Error: Only .txt files are allowed!"
+            message = "❌ Error: Only .txt files are allowed!"
         else:
             # Save uploaded file temporarily
             temp_file_path = default_storage.save("temp_medha.txt", ContentFile(uploaded_file.read()))
@@ -80,40 +77,46 @@ def upload_medha(request):
             print(f"✅ Uploaded file saved at: {full_temp_path}")
             print(f"✅ Processed file should be saved at: {processed_file_path}")
 
-            # Run `telpro_pdf.py` script
             try:
+                # Path to the script
                 script_path = os.path.join(settings.BASE_DIR, "spmApp", "medha.py")
-                subprocess.run([sys.executable, script_path, full_temp_path, processed_file_path], check=True)
 
-                # Check if file exists after processing
+                # Run medha.py and capture output
+                result = subprocess.run(
+                    [sys.executable, script_path, full_temp_path, processed_file_path],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+
+                print("✅ Subprocess STDOUT:")
+                print(result.stdout)
+                if result.stderr:
+                    print("⚠️ Subprocess STDERR:")
+                    print(result.stderr)
+
+                # Check if output file was created
                 if os.path.exists(processed_file_path):
                     print(f"✅ Processed file FOUND at: {processed_file_path}")
-
-                    # Serve file as an HTTP response for direct download
                     response = FileResponse(open(processed_file_path, "rb"), as_attachment=True)
                     response["Content-Disposition"] = f'attachment; filename="{processed_file_name}"'
                     message = "🚀 Great: File Processed Successfully!"
                     return response
                 else:
                     print("❌ ERROR: Processed file is missing after execution!")
-                    message = "Error: Processed file not found!"
+                    message = "❌ Error: Processed file not found!"
 
             except subprocess.CalledProcessError as e:
-                message = f"Error processing file: {e}"
+                print("❌ Subprocess failed:")
+                print(f"STDOUT: {e.stdout}")
+                print(f"STDERR: {e.stderr}")
+                message = f"❌ Error during processing:\n{e.stderr or str(e)}"
 
     return render(request, "home/upload_medha.html", {"message": message})
 
-
-# Telpro_PDf ============================================================================================
+# upload telpro --------------------------------------------------------------------------------------------
 import os
-import subprocess
-from django.conf import settings
-from django.shortcuts import render
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from django.http import FileResponse
-import sys
-
+import sys      
 def upload_telpro_pdf(request):
     print("🚀 Views.upload_telpro running")
     message = None
@@ -137,8 +140,18 @@ def upload_telpro_pdf(request):
             try:
                 # Call telpro_pdf.py using subprocess and pass input/output paths
                 script_path = os.path.join(settings.BASE_DIR, "spmApp", "telpro_pdf.py")
-                subprocess.run([sys.executable, script_path, full_temp_path, processed_file_path], check=True)
+                result = subprocess.run(
+                    [sys.executable, script_path, full_temp_path, processed_file_path],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
 
+                print("✅ Subprocess output:")
+                print(result.stdout)
+                if result.stderr:
+                    print("⚠️ Subprocess stderr:")
+                    print(result.stderr)
 
                 # Serve the Excel file if created
                 if os.path.exists(processed_file_path):
@@ -151,13 +164,25 @@ def upload_telpro_pdf(request):
                     message = "❌ Error: Excel file missing after processing!"
 
             except subprocess.CalledProcessError as e:
-                print(f"❌ Subprocess error: {e}")
-                message = f"❌ Error during processing: {e}"
+                print("❌ Subprocess failed:")
+                print(f"STDOUT: {e.stdout}")
+                print(f"STDERR: {e.stderr}")
+                message = f"❌ Error during processing:\n{e.stderr or str(e)}"
 
     return render(request, "home/upload_telpro_pdf.html", {"message": message})
 
-
 # ======Laxvan Text File============================================================================================
+import os
+import sys
+import uuid
+import subprocess
+from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.shortcuts import render
+from django.http import FileResponse
+
+
 def upload_laxvan(request):
     print("Views.Upload_laxvan running")
     message = None
@@ -167,12 +192,12 @@ def upload_laxvan(request):
     if request.method == "POST" and request.FILES.get("file"):
         uploaded_file = request.FILES["file"]
 
-    # Collect form inputs
+        # Collect form inputs
         cms_id = request.POST.get("cms_id", "").strip()
         train_no = request.POST.get("train_no", "").strip()
         loco_no = request.POST.get("loco_no", "").strip()
 
-        # Validation (optional but recommended)
+        # Validation
         if not cms_id or not train_no or not loco_no:
             message = "All fields are required!"
             return render(request, "home/upload_laxvan.html", {"message": message})
@@ -181,33 +206,39 @@ def upload_laxvan(request):
         if not uploaded_file.name.endswith(".txt"):
             message = "Error: Only .txt files are allowed!"
         else:
-            # Save uploaded file temporarily
-            temp_file_path = default_storage.save("temp_laxvan.txt", ContentFile(uploaded_file.read()))
+            # Generate a unique temp file name for each upload
+            unique_filename = f"temp_laxvan_{uuid.uuid4().hex}.txt"
+            temp_file_path = default_storage.save(unique_filename, ContentFile(uploaded_file.read()))
             full_temp_path = os.path.join(settings.MEDIA_ROOT, temp_file_path)
 
-            # print(f"✅ Uploaded file saved at: {full_temp_path}")
-            # print(f"✅ Processed file should be saved at: {processed_file_path}")
+            print(f"✅ Temp file saved at: {full_temp_path}")
+            print(f"✅ Running laxvan.py with: {full_temp_path}, {processed_file_path}, {cms_id}, {train_no}, {loco_no}")
 
-            # Run `telpro_pdf.py` script
             try:
+                # Run the external script
                 script_path = os.path.join(settings.BASE_DIR, "spmApp", "laxvan.py")
-                subprocess.run([sys.executable, script_path, full_temp_path, processed_file_path, cms_id, train_no, loco_no], check=True)
-                
+                subprocess.run([
+                    sys.executable,
+                    script_path,
+                    full_temp_path,
+                    processed_file_path,
+                    cms_id,
+                    train_no,
+                    loco_no
+                ], check=True)
 
-                # Check if file exists after processing
+                # Check if processed file is created
                 if os.path.exists(processed_file_path):
-                    # print(f"✅ Processed file FOUND at: {processed_file_path}")
-
-                    # Serve file as an HTTP response for direct download
+                    print(f"✅ Processed file found at: {processed_file_path}")
                     response = FileResponse(open(processed_file_path, "rb"), as_attachment=True)
                     response["Content-Disposition"] = f'attachment; filename="{processed_file_name}"'
-                    message = "🚀 Great: File Processed Successfully!"
                     return response
                 else:
                     print("❌ ERROR: Processed file is missing after execution!")
                     message = "Error: Processed file not found!"
 
             except subprocess.CalledProcessError as e:
+                print(f"❌ Subprocess failed: {e}")
                 message = f"Error processing file: {e}"
 
     return render(request, "home/upload_laxvan.html", {"message": message})
@@ -344,3 +375,6 @@ def extract_cms_ids(request):
         return JsonResponse({"cms_ids": cms_ids})
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+

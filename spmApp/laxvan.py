@@ -3,6 +3,8 @@ import sys
 import pandas as pd
 import re
 import datetime
+import json
+import time
 
 # Get the base directory of the Django project
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -15,14 +17,14 @@ if not os.path.exists(MEDIA_FOLDER):
     os.makedirs(MEDIA_FOLDER)
     print(f"✅ Created media folder at: {MEDIA_FOLDER}")
 
-def process_laxvan(file_path, output_path, cms_id, train_no, loco_no):
-    messages = []
+def process_laxvan(file_path, output_path, cms_id, train_no, loco_no,messages=None):
+    if messages is None:
+        messages = []  # Only initialize if not passed from outside
     try:
         print(f"✅ Processing file: {file_path}")
         print(f"🧑 CMS_ID: {cms_id}, 🚂 Train No: {train_no}, 🔧 Loco No: {loco_no}")
         messages.append(f"✅ File processed for Loco No- {loco_no} & CMS ID {cms_id}")
-                
-
+            
         encodings_to_try = ["utf-8", "latin-1", "utf-16", "windows-1252"]
         content = None
         for encoding in encodings_to_try:
@@ -56,6 +58,7 @@ def process_laxvan(file_path, output_path, cms_id, train_no, loco_no):
         df["Loco_No"] = loco_no
 
         print(df.head())
+        message = f"{loco_no},Please Wait....." 
 
         # Add computed Distance in meters
         df['Col_3'] = pd.to_numeric(df['Col_3'], errors='coerce')
@@ -133,7 +136,6 @@ def process_laxvan(file_path, output_path, cms_id, train_no, loco_no):
 
     # Deduct values from 'Run_Sum' to 'Distance' column ........................................................................................
         df['Rev_Dist'] = df['Run_Sum'] - df['Cum_Dist_Run']
-
     #  Delete Short Run ........................................................................................
 #       df = df[df['Run_No'] >= 10].reset_index(drop=True)
 
@@ -242,23 +244,19 @@ def process_laxvan(file_path, output_path, cms_id, train_no, loco_no):
             df['Desig'] = None
             
             # Rearrange the Columns
-            df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Crew_Name", "Desig","Nom_CLI","BPT_BFT","Cum_Dist_Run","Cum_Dist_LP","Run_No","Run_Sum","Rev_Dist","Pin_Point","BFT","BFT_END","BPT","BPT_END"]]
+            df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Crew_Name", "Desig","Nom_CLI","BFT_BPT","Cum_Dist_Run","Cum_Dist_LP","Run_No","Run_Sum","Rev_Dist","Pin_Point","BFT","BFT_END","BPT","BPT_END"]]
 
 
-
-
-
-
-
-
-# Save to Excel
+# Save to Excel..................................................................................
         df.to_excel(output_path, index=False)
         print(f"✅ Processed file saved at: {output_path}")
+        return messages
 
     except Exception as e:
         error_message = f"❌ Error during processing: {str(e)}"
         print(error_message)
         messages.append(error_message)
+        return messages
 
 if __name__ == "__main__":
     if len(sys.argv) < 6:
