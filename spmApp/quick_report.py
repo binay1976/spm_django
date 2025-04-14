@@ -105,19 +105,20 @@ def process_and_save(cms_id, df):
     """Processes filtered data and generates a PDF report."""
     try:
         print("\n=== Starting process_and_save ===")
-        print(f"Processing data for CMS_ID: {cms_id}")
-        print(f"DataFrame shape: {df.shape}")
+        # print(f"Processing data for CMS_ID: {cms_id}")
+        # print(f"DataFrame shape: {df.shape}")
         
         # Debug: Print sample of date and time columns
-        print("\nSample of input data:")
-        print(df[['Date', 'Time']].head())
-        print("\nColumn dtypes:")
-        print(df.dtypes)
+        # print("\nSample of input data:")
+        # print(df[['Date', 'Time']].head())
+        # print("\nColumn dtypes:")
+        # print(df.dtypes)
 
         # Extract basic details
         try:
             train_no = df["Train_No"].iloc[0] if not df.empty else "N/A"
-            loco_no = df["Loco_No"].iloc[0] if not df.empty else "N/A"
+            # loco_no = df["Loco_No"].iloc[0] if not df.empty else ""
+            loco_no = str(int(df["Loco_No"].iloc[0])) if not df.empty and pd.notnull(df["Loco_No"].iloc[0]) else ""
             designation = df["Desig"].iloc[0] if not df.empty else "N/A"
             pilot_name = df["Crew_Name"].iloc[0] if not df.empty else "N/A"
             nominated_cli = df["Nom_CLI"].iloc[0] if not df.empty else "N/A"
@@ -132,14 +133,14 @@ def process_and_save(cms_id, df):
         try:
             # Convert Date strings to datetime objects
             df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
-            print("\nDate conversion successful")
-            print(f"Sample converted dates: {df['Date'].head()}")
+            # print("\nDate conversion successful")
+            # print(f"Sample converted dates: {df['Date'].head()}")
 
             # Convert Time strings to time objects
             if isinstance(df['Time'].iloc[0], str):
                 df['Time'] = pd.to_datetime(df['Time'], format='%H:%M:%S', errors='coerce').dt.time
-            print("\nTime conversion successful")
-            print(f"Sample times: {df['Time'].head()}")
+            # print("\nTime conversion successful")
+            # print(f"Sample times: {df['Time'].head()}")
 
             # Combine Date and Time
             df['DateTime'] = df.apply(
@@ -332,10 +333,10 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
         # Process datetime
         if not pd.api.types.is_datetime64_any_dtype(df["Time"]):
             df["Time"] = pd.to_datetime(df["Time"], format="%H:%M:%S", errors="coerce")
-        df["DateTime"] = pd.to_datetime(df["Date"].astype(str) + " " + df["Time"].astype(str), errors="coerce")
-        df = df.dropna(subset=["DateTime"])
-        df = df.sort_values(by="DateTime")
-        df["TimeDiff"] = df["DateTime"].diff().fillna(pd.Timedelta(0))
+            df["DateTime"] = pd.to_datetime(df["Date"].astype(str) + " " + df["Time"].astype(str),errors="coerce")
+            df = df.dropna(subset=["DateTime"])
+            df = df.sort_values(by="DateTime")
+            df["TimeDiff"] = df["DateTime"].diff().fillna(pd.Timedelta(0))
 
         # Define speed slabs
         speed_slabs = [
@@ -343,24 +344,36 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
             (51, 60), (61, 70), (71, 80), (81, 90), (91, 100),
             (101, 110), (111, 120), (121, 130), (131, 150)
         ]
-
         # Table Headers
         pdf.set_font("Arial", style="B", size=12)
         pdf.cell(60, 10, "Speed Slab (km/h)", border=1, align="C")
         pdf.cell(60, 10, "Total Distance (Meter)", border=1, align="C")
         pdf.cell(60, 10, "Total Time (HH:MM:SS)", border=1, align="C")
         pdf.ln()
-
+        # Function to convert timedelta to "HH:MM:SS"
+        def strfdelta(timedelta):
+            if pd.isna(timedelta):  # Handle NaN cases
+                return " "
+            total_seconds = timedelta.total_seconds()
+            hours = int(total_seconds // 3600)
+            minutes = int((total_seconds % 3600) // 60)
+            seconds = int(total_seconds % 60)
+            return f"{hours:02}:{minutes:02}:{seconds:02}"
         # Populate Table Data
         pdf.set_font("Arial", size=12)
         for start, end in speed_slabs:
-            subset_df = df[(df['Speed'] >= start) & (df['Speed'] < end)]
+            subset_df = df[(df['Speed'] >= start) & (df['Speed'] < end)]  # Use separate DataFrame
             total_distance = subset_df["Distance"].sum() / 1000 if not subset_df.empty else 0
             total_time = subset_df["TimeDiff"].sum() if not subset_df.empty else pd.Timedelta(0)
+
+            total_distance_str = f"{total_distance:.3f} km" if total_distance > 0 else "- -"
+            total_time_str = strfdelta(total_time) if total_time.total_seconds() > 0 else "- -"
+
             pdf.cell(60, 10, f"{start}-{end}", border=1, align="C")
-            pdf.cell(60, 10, f"{total_distance:.3f} km", border=1, align="C")
-            pdf.cell(60, 10, strfdelta(total_time), border=1, align="C")
+            pdf.cell(60, 10, total_distance_str, border=1, align="C")
+            pdf.cell(60, 10, total_time_str, border=1, align="C")
             pdf.ln()
+        print("BPT Table Done")
 
 # ===== Bar Graph For Run Numbers =====
         pdf.add_page(orientation='L')
@@ -934,42 +947,9 @@ def save_to_pdf(cms_id, train_no, loco_no, total_km, top_speed, total_duration,
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         # Save the complete PDF
         pdf.output(pdf_file_path)
-        print(" PDF generated successfully with all pages")
+        print("PDF generated successfully with all pages")
 
         # Clean up temporary files
         if os.path.exists(chart_path):

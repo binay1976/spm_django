@@ -20,9 +20,6 @@ PROCESSED_FILE_PATH = os.path.join(MEDIA_FOLDER, "processed_medha.xlsx")
 def process_medha(file_path):
     try:
         print(f"Processing file: {file_path}")
-
-        # # Read input file
-        # df = pd.read_csv(file_path, delimiter="\t", encoding="utf-8", on_bad_lines="skip")
         encodings_to_try = ["utf-8", "latin-1", "utf-16", "windows-1252"]
         for encoding in encodings_to_try:
             try:
@@ -133,8 +130,8 @@ def process_medha(file_path):
     # Deduct values from 'Run_Sum' to 'Distance' column ........................................................................................
         df['Rev_Dist'] = df['Run_Sum'] - df['Cum_Dist_Run']
 
-    #  Delete Short Run ........................................................................................
-        df = df[df['Run_No'] >= 10].reset_index(drop=True)
+    # #  Delete Short Run ........................................................................................
+        #  # df = df[df['Cum_Dist_Run'] >= 10].reset_index(drop=True)
 
     # Create a new column 'Pin_Point' with value "10 Meters" for the rows closest to 10 in each 'Run_No' group .........................................................
         df['Pin_Point'] = ''
@@ -144,6 +141,13 @@ def process_medha(file_path):
                 .apply(lambda x: (x - dist).abs().idxmin())
             )
             df.loc[idxs.values, 'Pin_Point'] = label
+
+        # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 10).idxmin()) == df.index, '10 Meters', '')
+        # # Update 'Pin_Point' column with other values
+        # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 250).idxmin()) == df.index, '250 Meters', df['Pin_Point'])
+        # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 500).idxmin()) == df.index, '500 Meters', df['Pin_Point'])
+        # df['Pin_Point'] = np.where(df.groupby(['Run_No','CMS_ID'])['Rev_Dist'].transform(lambda x: abs(x - 1000).idxmin()) == df.index, '1000 Meters', df['Pin_Point'])
+        print("Pin Point Done")
 
 # Add BFT Column ......................................................................................................................
         df['Speed_shift'] = df['Speed'].shift(-1)
@@ -242,7 +246,7 @@ def process_medha(file_path):
 #  Save processed file in media folder ==============================================================================
         df.to_excel(PROCESSED_FILE_PATH, index=False)
 
-        print(f"Processed file saved at: {PROCESSED_FILE_PATH}")
+        print(f"Processed file saved")
 
     except Exception as e:
         print(f" Error processing file: {e}")
@@ -262,6 +266,6 @@ if __name__ == "__main__":
 
     # Confirm processed file exists
     if os.path.exists(PROCESSED_FILE_PATH):
-        print(f"Final confirmation: {PROCESSED_FILE_PATH} exists.")
+        print(f"Final confirmation: Temp file exists.")
     else:
         print(" ERROR: Processed file was not saved!")
