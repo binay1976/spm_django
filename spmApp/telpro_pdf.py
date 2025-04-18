@@ -8,132 +8,236 @@ import numpy as np
 import os
 import pandas as pd
 
+# def process_pdf(input_path, output_path):
+#     warnings.filterwarnings("ignore")
+#     all_data = []
+
+#     with pdfplumber.open(input_path) as pdf:
+#         for page in pdf.pages:
+#             table = page.extract_table()
+#             if table:
+#                 all_data.extend(table)
+#             text = page.extract_text()
+#             if text:
+#                 for line in text.split('\n'):
+#                     all_data.append(line.split())
+
+#     if not all_data:
+#         print("No data extracted from PDF.")
+#         return
+
+#     max_cols = max(len(row) for row in all_data)
+#     df = pd.DataFrame(all_data, columns=[f"Column_{i+1}" for i in range(max_cols)])
+
+#     for col in df.columns:
+#         if (df[col] == "RUN").sum() >= 10:
+#             df.rename(columns={col: "Status"}, inplace=True)
+
+#     if "Column_4" in df.columns:
+#         df.insert(df.columns.get_loc("Column_4") + 1, "data", "")
+
+#     if "Status" in df.columns:
+#         column_order = [
+#             "Column_1", "Column_2", "Column_3", "Column_4", "data",
+#             "Column_6", "Column_7", "Column_8", "Column_9",
+#             "Column_10", "Column_11", "Status"
+#         ]
+#         df = df[[col for col in column_order if col in df.columns]]
+#         print("Status & Data Column Created and Reordered")
+
+#     # -------------------------------------------------------------------------------------------------------
+#     # Identify columns to clear (all except the required ones)
+#     columns_to_clear = [col for col in df.columns if col not in ["Column_1", "Column_2", "Column_3", "Column_4", "Status"]]
+#     # Clear data from unwanted columns by setting values to empty strings or NaN
+#     df[columns_to_clear] = ""
+# # -------------------------------------------------------------------------------------------------------
+#     # Copy Column_1 data to Column_5 for those rows who has Concatenated Value with Driver ID:-
+#     if not df.empty and "Column_1" in df and "data" in df:  # Identify rows where Column_1 contains "Driver"
+#         driver_rows = df["Column_1"].astype(str).str.contains("Driver ID:-", na=False, regex=True)
+#         df.loc[driver_rows, "data"] = df.loc[driver_rows, "Column_1"]
+#     if "data" not in df.columns:  # Check if "Column_1" exists before filtering
+#         print("Error: data not found in extracted data.")
+#         return
+# # -------------------------------------------------------------------------------------------------------    
+#     def extract_values(row):
+#         match = re.search(
+#             r"Driver ID:-\s*([\S]+)\s*Train No:-\s*([\S ]+?)\s*Tr Load\(Ton\):-\s*([\S]+)\s*Loco No:-\s*([\S]+)\s*Wheel Dia\(mm\):-\s*([\S]+)\s*SpeedLimit\(kmph\):-\s*([\S]+)",
+#             str(row),
+#             re.DOTALL  # Enables multi-line matching
+#         )
+#         if match:
+#             return list(match.groups())  # Convert tuple to list
+#         return [None] * 6  # Ensure every row has exactly 6 values
+
+#     # Apply function to DataFrame
+#     df[["Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11"]] = df["data"].apply(lambda x: pd.Series(extract_values(x)))
+#     print("Splittings Done")
+# # -------------------------------------------------------------------------------------------------------
+#     def extract_values(row):
+#         pattern = r"""
+#             Driver\s+ID:-\s*(.+?)\s+
+#             Train\s+No:-\s*(.+?)\s+
+#             Tr\s+Load\(Ton\):-\s*(.+?)\s+
+#             Loco\s+No:-\s*(.+?)\s+
+#             Wheel\s+Dia\(mm\):-\s*(.+?)\s+
+#             SpeedLimit\(kmph\):-\s*(.+?)
+#         """
+#         match = re.search(pattern, str(row), re.VERBOSE | re.DOTALL)
+#         if match:
+#             return list(match.groups())
+#         return [None] * 6
+#     df[["Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11"]] = df["data"].apply(lambda x: pd.Series(extract_values(x)))
+#     print("Splittings Done")
+# # -------------------------------------------------------------------------------------------------------
+#      # Reaaarnge Columns
+#     desired_order = [
+#         "Column_1", "Column_2", "Column_3", "Column_4", "Status", "data", 
+#         "Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11"
+#     ]
+#     df = df[desired_order]
+# # ----------------------------------------------------------------------------------------------
+#     # Columns to apply the fill operation
+#     columns_to_fill = ["Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11"]
+#     changed_idx = df.index[df["Status"] == "CHANGED"].tolist()
+#     start = 0
+#     for i in range(len(changed_idx)):
+#         # Fill down from the last valid data point until "CHANGED"
+#         df.loc[start:changed_idx[i]-1, columns_to_fill] = df.loc[start:changed_idx[i]-1, columns_to_fill].ffill()
+#         next_valid = df[columns_to_fill].iloc[changed_idx[i]+1:].first_valid_index()
+#         if next_valid is not None:
+#             df.loc[changed_idx[i]+1:next_valid, columns_to_fill] = df.loc[changed_idx[i]+1:next_valid, columns_to_fill].bfill()
+#         start = changed_idx[i] + 1
+#     df.loc[start:, columns_to_fill] = df.loc[start:, columns_to_fill].ffill()
+# # -------------------------------------------------------------------------------------------------------
+#     # Filter: Keep rows where Column_1 contains "Driver ID:-" or "/2"
+#     df = df[df["Status"].astype(str).str.contains("RUN|STOP", na=False, regex=True)]
+#     desired_order = [
+#         "Column_1", "Column_2", "Column_3", "Column_4", 
+#         "Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11", "Status", "data"
+#     ]
+#     df = df[desired_order]
+
+#     # Rename first four columns
+#     df.columns = ["Date", "Time", "Distance", "Speed", "CMS_ID", "Train_No","Column_8","Loco_No"] + list(df.columns[8:])
+#     # Rearrange the Columns
+#     df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Column_8","Status", "data"]]
+
+#     # Remove Gaps in CMS ID
+#     df['CMS_ID'] = df['CMS_ID'].str.replace(' ', '', regex=False)
+
+
+#     print("Analyzing PDF File, Please Wait.........")
+#     # message = f" Analysing PDF File, Please Wait........."
+#  # # Columns to be deleted
+#     columns_to_delete = ["Column_8","data", "Status"]
+#      # Ensure the columns exist before dropping
+#     df = df.drop(columns=[col for col in columns_to_delete if col in df.columns], errors="ignore")
+   
+#     print("Basic Columns Done")
+
+import pdfplumber
+import pandas as pd
+import warnings
+import re
+import os
+import gc
+
 def process_pdf(input_path, output_path):
     warnings.filterwarnings("ignore")
-    all_data = []
+    extracted_rows = []
+    print("telpro_pdf.py statrted...")
 
     with pdfplumber.open(input_path) as pdf:
         for page in pdf.pages:
+            # Try table extraction first
             table = page.extract_table()
             if table:
-                all_data.extend(table)
-            text = page.extract_text()
-            if text:
-                for line in text.split('\n'):
-                    all_data.append(line.split())
+                extracted_rows.extend(table)
+            else:
+                # If no table, fall back to text
+                text = page.extract_text()
+                if text:
+                    for line in text.split('\n'):
+                        extracted_rows.append(line.split())
 
-    if not all_data:
+            # Clear memory after each page
+            gc.collect()
+
+    if not extracted_rows:
         print("No data extracted from PDF.")
         return
 
-    max_cols = max(len(row) for row in all_data)
-    df = pd.DataFrame(all_data, columns=[f"Column_{i+1}" for i in range(max_cols)])
+    max_cols = max(len(row) for row in extracted_rows)
+    df = pd.DataFrame(extracted_rows, columns=[f"Column_{i+1}" for i in range(max_cols)])
+    del extracted_rows
+    gc.collect()
 
+    # Rename column with many "RUN" values
     for col in df.columns:
         if (df[col] == "RUN").sum() >= 10:
             df.rename(columns={col: "Status"}, inplace=True)
 
+    # Insert 'data' column
     if "Column_4" in df.columns:
         df.insert(df.columns.get_loc("Column_4") + 1, "data", "")
 
-    if "Status" in df.columns:
-        column_order = [
-            "Column_1", "Column_2", "Column_3", "Column_4", "data",
-            "Column_6", "Column_7", "Column_8", "Column_9",
-            "Column_10", "Column_11", "Status"
-        ]
-        df = df[[col for col in column_order if col in df.columns]]
-        print("Status & Data Column Created and Reordered")
+    # Copy entire row of Driver Info into 'data'
+    if "Column_1" in df.columns and "data" in df.columns:
+        df.loc[df["Column_1"].str.contains("Driver ID:-", na=False), "data"] = df["Column_1"]
 
-    # -------------------------------------------------------------------------------------------------------
-    # Identify columns to clear (all except the required ones)
-    columns_to_clear = [col for col in df.columns if col not in ["Column_1", "Column_2", "Column_3", "Column_4", "Status"]]
-    # Clear data from unwanted columns by setting values to empty strings or NaN
-    df[columns_to_clear] = ""
-# -------------------------------------------------------------------------------------------------------
-    # Copy Column_1 data to Column_5 for those rows who has Concatenated Value with Driver ID:-
-    if not df.empty and "Column_1" in df and "data" in df:  # Identify rows where Column_1 contains "Driver"
-        driver_rows = df["Column_1"].astype(str).str.contains("Driver ID:-", na=False, regex=True)
-        df.loc[driver_rows, "data"] = df.loc[driver_rows, "Column_1"]
-    if "data" not in df.columns:  # Check if "Column_1" exists before filtering
-        print("Error: data not found in extracted data.")
-        return
-# -------------------------------------------------------------------------------------------------------    
-    def extract_values(row):
-        match = re.search(
-            r"Driver ID:-\s*([\S]+)\s*Train No:-\s*([\S ]+?)\s*Tr Load\(Ton\):-\s*([\S]+)\s*Loco No:-\s*([\S]+)\s*Wheel Dia\(mm\):-\s*([\S]+)\s*SpeedLimit\(kmph\):-\s*([\S]+)",
-            str(row),
-            re.DOTALL  # Enables multi-line matching
+    # Extract values from the 'data' column using a single function
+    def extract_values(text):
+        pattern = re.compile(
+            r"Driver\s+ID:-\s*(.+?)\s+"
+            r"Train\s+No:-\s*(.+?)\s+"
+            r"Tr\s+Load\(Ton\):-\s*(.+?)\s+"
+            r"Loco\s+No:-\s*(.+?)\s+"
+            r"Wheel\s+Dia\(mm\):-\s*(.+?)\s+"
+            r"SpeedLimit\(kmph\):-\s*(.+?)",
+            re.DOTALL | re.VERBOSE
         )
-        if match:
-            return list(match.groups())  # Convert tuple to list
-        return [None] * 6  # Ensure every row has exactly 6 values
+        match = pattern.search(str(text))
+        return list(match.groups()) if match else [None] * 6
 
-    # Apply function to DataFrame
-    df[["Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11"]] = df["data"].apply(lambda x: pd.Series(extract_values(x)))
-    print("Splittings Done")
-# -------------------------------------------------------------------------------------------------------
-    def extract_values(row):
-        pattern = r"""
-            Driver\s+ID:-\s*(.+?)\s+
-            Train\s+No:-\s*(.+?)\s+
-            Tr\s+Load\(Ton\):-\s*(.+?)\s+
-            Loco\s+No:-\s*(.+?)\s+
-            Wheel\s+Dia\(mm\):-\s*(.+?)\s+
-            SpeedLimit\(kmph\):-\s*(.+?)
-        """
-        match = re.search(pattern, str(row), re.VERBOSE | re.DOTALL)
-        if match:
-            return list(match.groups())
-        return [None] * 6
-    df[["Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11"]] = df["data"].apply(lambda x: pd.Series(extract_values(x)))
-    print("Splittings Done")
-# -------------------------------------------------------------------------------------------------------
-     # Reaaarnge Columns
-    desired_order = [
-        "Column_1", "Column_2", "Column_3", "Column_4", "Status", "data", 
-        "Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11"
-    ]
-    df = df[desired_order]
-# ----------------------------------------------------------------------------------------------
-    # Columns to apply the fill operation
-    columns_to_fill = ["Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11"]
-    changed_idx = df.index[df["Status"] == "CHANGED"].tolist()
-    start = 0
-    for i in range(len(changed_idx)):
-        # Fill down from the last valid data point until "CHANGED"
-        df.loc[start:changed_idx[i]-1, columns_to_fill] = df.loc[start:changed_idx[i]-1, columns_to_fill].ffill()
-        next_valid = df[columns_to_fill].iloc[changed_idx[i]+1:].first_valid_index()
-        if next_valid is not None:
-            df.loc[changed_idx[i]+1:next_valid, columns_to_fill] = df.loc[changed_idx[i]+1:next_valid, columns_to_fill].bfill()
-        start = changed_idx[i] + 1
-    df.loc[start:, columns_to_fill] = df.loc[start:, columns_to_fill].ffill()
-# -------------------------------------------------------------------------------------------------------
-    # Filter: Keep rows where Column_1 contains "Driver ID:-" or "/2"
+    # Apply in one go
+    extract_cols = df["data"].apply(lambda x: pd.Series(extract_values(x)))
+    extract_cols.columns = ["Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11"]
+    df = pd.concat([df, extract_cols], axis=1)
+    del extract_cols
+    gc.collect()
+
+    # Fill data around CHANGED rows
+    if "Status" in df.columns:
+        fill_cols = ["Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11"]
+        changed_idx = df.index[df["Status"] == "CHANGED"].tolist()
+        start = 0
+        for i in range(len(changed_idx)):
+            df.loc[start:changed_idx[i]-1, fill_cols] = df.loc[start:changed_idx[i]-1, fill_cols].ffill()
+            next_valid = df[fill_cols].iloc[changed_idx[i]+1:].first_valid_index()
+            if next_valid:
+                df.loc[changed_idx[i]+1:next_valid, fill_cols] = df.loc[changed_idx[i]+1:next_valid, fill_cols].bfill()
+            start = changed_idx[i] + 1
+        df.loc[start:, fill_cols] = df.loc[start:, fill_cols].ffill()
+
+    # Keep only rows with RUN or STOP in Status
     df = df[df["Status"].astype(str).str.contains("RUN|STOP", na=False, regex=True)]
-    desired_order = [
-        "Column_1", "Column_2", "Column_3", "Column_4", 
-        "Column_6", "Column_7", "Column_8", "Column_9", "Column_10", "Column_11", "Status", "data"
-    ]
-    df = df[desired_order]
 
-    # Rename first four columns
-    df.columns = ["Date", "Time", "Distance", "Speed", "CMS_ID", "Train_No","Column_8","Loco_No"] + list(df.columns[8:])
-    # Rearrange the Columns
-    df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "Column_8","Status", "data"]]
+    # Rename and rearrange
+    df.columns = ["Date", "Time", "Distance", "Speed", "data"] + list(df.columns[5:])
+    df.rename(columns={
+        "Column_6": "CMS_ID", "Column_7": "Train_No", "Column_9": "Loco_No"
+    }, inplace=True)
+    df["CMS_ID"] = df["CMS_ID"].str.replace(" ", "", regex=False)
 
-    # Remove Gaps in CMS ID
-    df['CMS_ID'] = df['CMS_ID'].str.replace(' ', '', regex=False)
+    df = df[["Date", "Time", "Speed", "Distance", "CMS_ID", "Train_No", "Loco_No", "data", "Status"]]
 
+    # Final clean
+    df.drop(columns=["data", "Status"], inplace=True, errors="ignore")
 
-    print("Analyzing PDF File, Please Wait.........")
-    # message = f" Analysing PDF File, Please Wait........."
- # # Columns to be deleted
-    columns_to_delete = ["Column_8","data", "Status"]
-     # Ensure the columns exist before dropping
-    df = df.drop(columns=[col for col in columns_to_delete if col in df.columns], errors="ignore")
-   
-    print("Basic Columns Done")
+    # Save to Excel
+    df.to_excel(output_path, index=False)
+    print("PDF processing complete.")
+
     # Trim white spaces from all string columns
     df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
      # Convert certain columns to numeric format .................................................................................................
