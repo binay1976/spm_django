@@ -1,0 +1,5 @@
+.env
+spm_django_env_3.11/
+Dockerfile
+temp*
+chart*

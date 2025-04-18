@@ -1,0 +1,15 @@
+name : spm-docker-project
+services:
+  app:
+    image: spm-docker-image,python
+    container_name: spm-docker-container
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/app
+    environment:
+      - ENV=development

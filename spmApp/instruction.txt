@@ -10,7 +10,7 @@
     
 git init
 git add .  
-git commit -m "saini9"  
+git commit -m "overload"  
 git push -f 
  
 git push --force --set-upstream origin main
@@ -64,7 +64,10 @@ Create My env:------------------------------------------------------------------
     https://spm-exe-4vppppw6flwcgtsutagwra.streamlit.app/
     https://spm-exe-4vppppw6flwcgtsutagwra.streamlit.app/?embed_options=show_toolbar,light_theme,show_colored_line,disable_scrolling,show_padding
 
-
+1. ✅ To built Docker Image:-  docker build -t spm-docker-image .
+2. ✅ spm_django_env_3.11\Scripts\activate
+3. ✅ cd spm_live
+4. ✅ python manage.py runserver
     
 
 
